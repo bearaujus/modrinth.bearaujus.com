@@ -1,0 +1,20 @@
+{
+  "name": "modrinth-bearaujus-com",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio site for bearaujus' Minecraft Fabric mods — modrinth.bearaujus.com",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/silkscreen": "^5.2.8",
+    "astro": "^6.4.6"
+  }
+}

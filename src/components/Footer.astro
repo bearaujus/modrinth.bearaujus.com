@@ -1,0 +1,75 @@
+---
+import { MODRINTH_USER } from '../data/mods';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <span style="background:var(--ovr)"></span>
+        <span style="background:var(--net)"></span>
+        <span style="background:var(--end)"></span>
+        <span style="background:var(--dawn)"></span>
+      </span>
+      <span>bearaujus · Minecraft Fabric mods</span>
+    </div>
+
+    <div class="footer-links">
+      <a href={MODRINTH_USER} target="_blank" rel="noopener noreferrer">Modrinth</a>
+      <a href="https://github.com/bearaujus" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="mailto:modrinth@bearaujus.com">Email</a>
+    </div>
+
+    <p class="footer-note">© {year} bearaujus · Not affiliated with Mojang or Microsoft.</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: 2.5rem;
+    background: var(--void-2);
+  }
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+  }
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .brand-mark {
+    display: grid;
+    grid-template-columns: repeat(2, 6px);
+    grid-template-rows: repeat(2, 6px);
+    gap: 2px;
+  }
+  .brand-mark span {
+    width: 6px;
+    height: 6px;
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .footer-links a:hover {
+    color: var(--ovr);
+  }
+  .footer-note {
+    width: 100%;
+    font-size: 0.7rem;
+    color: var(--faint);
+    border-top: 1px solid var(--line-soft);
+    padding-top: 1.2rem;
+    margin-top: 0.4rem;
+  }
+</style>

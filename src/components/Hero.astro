@@ -1,0 +1,102 @@
+---
+import { MC_VERSION, LOADER, MODS } from '../data/mods';
+
+interface Props {
+  totalDownloads: number;
+}
+const { totalDownloads } = Astro.props;
+const fmt = (n: number) => n.toLocaleString('en-US');
+---
+
+<section class="hero section" id="top">
+  <div class="wrap hero-inner">
+    <p class="eyebrow" data-reveal>Fabric mods · Minecraft Java {MC_VERSION}</p>
+
+    <h1 class="hero-title" data-reveal style="--reveal-delay:0.05s">
+      Small server mods that
+      <span class="hl">say the right thing</span>
+      at the right moment.
+    </h1>
+
+    <p class="hero-sub" data-reveal style="--reveal-delay:0.12s">
+      I build server-first {LOADER} mods that live in Minecraft's own action bar,
+      chat, and Tab list — dimension cues, death recovery, and smarter sleep.
+      No client install required.
+    </p>
+
+    <div class="hero-cta" data-reveal style="--reveal-delay:0.18s">
+      <a class="btn btn-primary" href="#mods">View the mods</a>
+      <a class="btn btn-ghost" href="#approach">What they share</a>
+    </div>
+
+    <dl class="hero-stats" data-reveal style="--reveal-delay:0.24s">
+      <div>
+        <dt>Published mods</dt>
+        <dd>{MODS.length}</dd>
+      </div>
+      <div>
+        <dt>Downloads</dt>
+        <dd>{fmt(totalDownloads)}</dd>
+      </div>
+      <div>
+        <dt>Game version</dt>
+        <dd class="mono">{MC_VERSION}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-top: clamp(3.5rem, 2rem + 7vw, 8rem);
+    padding-bottom: clamp(3.5rem, 2rem + 6vw, 7rem);
+  }
+  .hero-title {
+    font-size: var(--step-4);
+    margin-top: 1.1rem;
+    max-width: 16ch;
+  }
+  .hero-title .hl {
+    color: var(--ovr);
+  }
+  .hero-sub {
+    margin-top: 1.5rem;
+    color: var(--muted);
+    font-size: var(--step-1);
+    max-width: 52ch;
+  }
+  .hero-cta {
+    margin-top: 2.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .hero-stats {
+    margin: 3rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.6rem, 1rem + 3vw, 3.5rem);
+    border-top: 1px solid var(--line-soft);
+    padding-top: 1.6rem;
+  }
+  .hero-stats dt {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .hero-stats dd {
+    margin: 0.4rem 0 0;
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .hero-stats .mono {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--step-1);
+  }
+</style>

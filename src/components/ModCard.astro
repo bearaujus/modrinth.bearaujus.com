@@ -1,0 +1,160 @@
+---
+import type { Mod } from '../data/mods';
+import { MC_VERSION } from '../data/mods';
+import type { Stat } from '../lib/modrinth';
+
+interface Props {
+  mod: Mod;
+  stat: Stat;
+  index: number;
+}
+const { mod, stat, index } = Astro.props;
+const fmt = (n: number) => n.toLocaleString('en-US');
+const href = `https://modrinth.com/mod/${mod.slug}`;
+---
+
+<a
+  class="card panel"
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  style={`--accent: var(--${mod.accent}); --reveal-delay:${index * 0.06}s`}
+  data-reveal
+>
+  <div class="card-head">
+    <img
+      class="card-icon"
+      src={`/mods/${mod.slug}/icon.png`}
+      alt={`${mod.name} icon`}
+      width="56"
+      height="56"
+      loading="lazy"
+    />
+    <div class="card-id">
+      <h3 class="card-name">{mod.name}</h3>
+      <div class="card-cats">
+        {mod.categories.map((c) => <span class="dot-cat">{c}</span>)}
+      </div>
+    </div>
+  </div>
+
+  <p class="card-tag">{mod.tagline}</p>
+
+  <div class="card-foot">
+    <div class="card-metrics">
+      <span class="metric" title="Downloads on Modrinth">
+        <span class="metric-num">{fmt(stat.downloads)}</span>
+        <span class="metric-lbl">downloads</span>
+      </span>
+      <span class="metric" title="Followers on Modrinth">
+        <span class="metric-num">{fmt(stat.followers)}</span>
+        <span class="metric-lbl">followers</span>
+      </span>
+    </div>
+    <span class="chip"><strong>{MC_VERSION}</strong></span>
+  </div>
+
+  <span class="card-go" aria-hidden="true">View on Modrinth ↗</span>
+</a>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.3rem;
+    border-left: 3px solid var(--accent);
+    transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
+      background 0.18s var(--ease);
+    height: 100%;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    background: var(--panel-2);
+  }
+  .card:hover .card-go {
+    color: var(--accent);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    image-rendering: auto;
+    background: var(--void);
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .card-name {
+    font-size: var(--step-1);
+  }
+  .card-cats {
+    margin-top: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.7rem;
+  }
+  .dot-cat {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+    color: var(--faint);
+    text-transform: lowercase;
+  }
+  .dot-cat::before {
+    content: '#';
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .card-tag {
+    color: var(--muted);
+    font-size: var(--step--1);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line-soft);
+  }
+  .card-metrics {
+    display: flex;
+    gap: 1.1rem;
+  }
+  .metric {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .metric-num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .metric-lbl {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .card-go {
+    font-family: var(--font-pixel);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    transition: color 0.18s var(--ease);
+  }
+</style>

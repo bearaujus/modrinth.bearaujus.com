@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import ModCard from '../components/ModCard.astro';
+import ModShowcase from '../components/ModShowcase.astro';
+import Principles from '../components/Principles.astro';
+import About from '../components/About.astro';
+import Footer from '../components/Footer.astro';
+
+import { MODS } from '../data/mods';
+import { getStats, totals } from '../lib/modrinth';
+
+// Live Modrinth stats, fetched at build time (falls back to static counts).
+const stats = await getStats();
+const t = totals(stats);
+const statFor = (id: string) => stats[id] ?? { downloads: 0, followers: 0 };
+---
+
+<Base>
+  <Nav />
+  <main>
+    <Hero totalDownloads={t.downloads} />
+
+    <section class="section mods" id="mods">
+      <div class="wrap">
+        <p class="eyebrow" data-reveal>The mods</p>
+        <h2 class="mods-title" data-reveal style="--reveal-delay:0.05s">
+          Four mods, all live on Modrinth.
+        </h2>
+
+        <div class="mods-grid">
+          {MODS.map((mod, i) => (
+            <ModCard mod={mod} stat={statFor(mod.modrinthId)} index={i} />
+          ))}
+        </div>
+
+        <div class="mods-detail">
+          {MODS.map((mod, i) => (
+            <ModShowcase mod={mod} stat={statFor(mod.modrinthId)} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <Principles />
+    <About stats={stats} />
+  </main>
+  <Footer />
+</Base>
+
+<script>
+  import '../scripts/reveal.ts';
+</script>
+
+<style>
+  .mods-title {
+    margin-top: 1rem;
+    font-size: var(--step-3);
+    max-width: 18ch;
+  }
+  .mods-grid {
+    margin-top: clamp(2rem, 1rem + 3vw, 3rem);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  }
+  .mods-detail {
+    margin-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  }
+</style>

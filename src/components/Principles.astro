@@ -1,0 +1,110 @@
+---
+import { MC_VERSION } from '../data/mods';
+
+// What every mod has in common — framed around the public, user-facing
+// promises on each Modrinth listing, not internal tooling.
+const principles = [
+  {
+    code: 'SRV',
+    title: 'Server-first by default',
+    body:
+      'Core features run on the dedicated server. Everyone gets the cues, broadcasts, and Tab-list info the moment they join — no client install required.',
+    accent: 'ovr',
+  },
+  {
+    code: 'VER',
+    title: 'Exact, tested compatibility',
+    body: `Each mod claims only the Minecraft versions it has actually run on — currently Java ${MC_VERSION} — so a listing never promises a version it hasn't booted.`,
+    accent: 'net',
+  },
+  {
+    code: 'CFG',
+    title: 'Client and server, cleanly separated',
+    body:
+      'Personal client settings stay distinct from server rules, each with its own master toggle and permission-gated Mod Menu screens. Nothing overwrites your local choices.',
+    accent: 'end',
+  },
+  {
+    code: 'FIT',
+    title: 'Focused, and built to pair',
+    body:
+      'Every mod does one job and stays out of the way — and where it helps they cooperate, like Sleep Wake-Up Notifier following Improved Sleep’s thresholds automatically.',
+    accent: 'dawn',
+  },
+];
+---
+
+<section class="section principles" id="approach">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>What every mod shares</p>
+    <h2 class="pr-title" data-reveal style="--reveal-delay:0.05s">
+      Four mods, one set of principles.
+    </h2>
+    <p class="pr-lead" data-reveal style="--reveal-delay:0.1s">
+      These aren't one-off jars. They follow the same rules — so the way one
+      behaves on your server is the way they all behave.
+    </p>
+
+    <div class="pr-grid">
+      {principles.map((p, i) => (
+        <div
+          class="spec panel"
+          style={`--accent: var(--${p.accent}); --reveal-delay:${i * 0.06}s`}
+          data-reveal
+        >
+          <span class="spec-code">{p.code}</span>
+          <h3 class="spec-title">{p.title}</h3>
+          <p class="spec-body">{p.body}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pr-title {
+    margin-top: 1rem;
+    font-size: var(--step-3);
+    max-width: 18ch;
+  }
+  .pr-lead {
+    margin-top: 1.2rem;
+    color: var(--muted);
+    font-size: var(--step-1);
+    max-width: 56ch;
+  }
+  .pr-grid {
+    margin-top: clamp(2rem, 1rem + 3vw, 3.2rem);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  }
+  .spec {
+    position: relative;
+    padding: 1.4rem 1.3rem 1.5rem;
+    overflow: hidden;
+  }
+  .spec::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .spec-code {
+    font-family: var(--font-pixel);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .spec-title {
+    margin-top: 0.8rem;
+    font-size: var(--step-1);
+  }
+  .spec-body {
+    margin-top: 0.7rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+    line-height: 1.55;
+  }
+</style>

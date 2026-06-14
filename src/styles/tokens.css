@@ -1,0 +1,51 @@
+/* ============================================================
+   Design tokens — "In-game HUD" direction
+   The palette is built from Minecraft's own dimensions and
+   day-cycle, so color carries meaning instead of decoration.
+   ============================================================ */
+:root {
+  /* --- surfaces: deep slate, never pure black --- */
+  --void: #0b0d10;
+  --void-2: #0e1116;
+  --panel: #14171c;
+  --panel-2: #191d24;
+  --line: #252b33;
+  --line-soft: #1d222a;
+
+  /* --- ink --- */
+  --ink: #e8edf2;
+  --muted: #939dab;
+  --faint: #5c656f;
+
+  /* --- dimension / day-cycle accents (meaningful) --- */
+  --ovr: #5fd068; /* Overworld — the lead/brand accent */
+  --ovr-dim: #2f6d39;
+  --net: #e0533a; /* Nether */
+  --end: #b18cff; /* The End */
+  --dawn: #f2b84b; /* morning / wake-up */
+
+  --ovr-glow: color-mix(in srgb, var(--ovr) 30%, transparent);
+
+  /* --- type --- */
+  --font-pixel: 'Silkscreen', 'Courier New', monospace;       /* labels, eyebrows, wordmark */
+  --font-body: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;     /* engineering spec values */
+
+  /* --- type scale (fluid) --- */
+  --step--1: clamp(0.78rem, 0.74rem + 0.2vw, 0.86rem);
+  --step-0: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --step-1: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2.1rem, 1.7rem + 2vw, 3.4rem);
+  --step-4: clamp(2.8rem, 2rem + 4vw, 5.2rem);
+
+  /* --- spacing / layout --- */
+  --space-section: clamp(4rem, 3rem + 6vw, 8rem);
+  --maxw: 1120px;
+  --radius: 4px;       /* HUD panels stay nearly square */
+  --radius-pill: 999px;
+
+  /* --- motion --- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 0.5s;
+}

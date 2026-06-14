@@ -1,0 +1,51 @@
+---
+// Self-hosted fonts (bundled at build, no runtime network call)
+import '@fontsource/silkscreen/400.css';
+import '@fontsource-variable/inter';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/600.css';
+
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'bearaujus — Minecraft Fabric mods',
+  description = 'Server-first Fabric mods for Minecraft Java by bearaujus: dimension cues, death recovery, and smarter sleep. Published on Modrinth.',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0b0d10" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="modrinth.bearaujus.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Make scroll-reveal opt-in only when JS runs -->
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

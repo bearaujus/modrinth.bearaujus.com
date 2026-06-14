@@ -1,0 +1,152 @@
+---
+import { totals } from '../lib/modrinth';
+import type { StatsMap } from '../lib/modrinth';
+import { MODRINTH_USER, MC_VERSION } from '../data/mods';
+
+interface Props {
+  stats: StatsMap;
+}
+const { stats } = Astro.props;
+const t = totals(stats);
+const fmt = (n: number) => n.toLocaleString('en-US');
+
+const links = [
+  { label: 'Modrinth', value: 'bearaujus', href: MODRINTH_USER },
+  { label: 'GitHub', value: 'bearaujus', href: 'https://github.com/bearaujus' },
+  { label: 'Email', value: 'modrinth@bearaujus.com', href: 'mailto:modrinth@bearaujus.com' },
+];
+---
+
+<section class="section about" id="about">
+  <div class="wrap about-grid">
+    <div class="about-copy" data-reveal>
+      <p class="eyebrow">About</p>
+      <h2 class="about-title">
+        I'm bearaujus — I build small, server-first Minecraft mods.
+      </h2>
+      <p class="about-body">
+        My focus is quiet utility: mods that drop onto a Fabric server and make
+        a group's day-to-day play clearer, without forcing every player to
+        install anything. Each one is built for exact, tested compatibility —
+        currently Minecraft Java {MC_VERSION} — and claims only the versions it
+        has actually run on.
+      </p>
+
+      <ul class="about-links">
+        {links.map((l) => (
+          <li>
+            <a href={l.href} target="_blank" rel="noopener noreferrer">
+              <span class="link-label">{l.label}</span>
+              <span class="link-value">{l.value} ↗</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <aside class="about-stats panel" data-reveal style="--reveal-delay:0.08s">
+      <div class="stat-row">
+        <span class="stat-num">{t.mods}</span>
+        <span class="stat-lbl">published mods</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-num">{fmt(t.downloads)}</span>
+        <span class="stat-lbl">total downloads</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-num">{fmt(t.followers)}</span>
+        <span class="stat-lbl">followers</span>
+      </div>
+      <p class="stat-note">Live from the Modrinth API at build time.</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .about-grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 4vw, 3.5rem);
+    align-items: start;
+  }
+  @media (min-width: 860px) {
+    .about-grid {
+      grid-template-columns: 1.4fr 0.6fr;
+    }
+  }
+  .about-title {
+    margin-top: 1rem;
+    font-size: var(--step-3);
+    max-width: 20ch;
+  }
+  .about-body {
+    margin-top: 1.2rem;
+    color: var(--muted);
+    font-size: var(--step-1);
+    max-width: 56ch;
+  }
+
+  .about-links {
+    margin-top: 2rem;
+    display: grid;
+    gap: 0.6rem;
+    max-width: 420px;
+  }
+  .about-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    transition: border-color 0.16s var(--ease), transform 0.16s var(--ease);
+  }
+  .about-links a:hover {
+    border-color: var(--ovr);
+    transform: translateX(3px);
+  }
+  .link-label {
+    font-family: var(--font-pixel);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .link-value {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+
+  .about-stats {
+    padding: 1.6rem;
+    display: grid;
+    gap: 1.3rem;
+  }
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .stat-num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--step-2);
+    line-height: 1;
+    color: var(--ovr);
+  }
+  .stat-lbl {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .stat-note {
+    margin-top: 0.2rem;
+    font-size: 0.66rem;
+    color: var(--faint);
+    border-top: 1px solid var(--line-soft);
+    padding-top: 0.9rem;
+  }
+</style>
