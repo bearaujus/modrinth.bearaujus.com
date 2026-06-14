@@ -14,8 +14,8 @@ export interface Props {
 }
 
 const {
-  title = 'bearaujus — Minecraft Fabric mods',
-  description = 'Server-first Fabric mods for Minecraft Java by bearaujus: dimension cues, death recovery, and smarter sleep. Published on Modrinth.',
+  title = 'Minecraft Fabric Mods by bearaujus — Server-First Java Mods',
+  description = 'Four free, server-first Minecraft: Java Edition mods for Fabric by bearaujus — dimension cues, death recovery, and smarter sleep. Live on Modrinth, no client install required.',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -29,8 +29,17 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="author" content="bearaujus (Haryo Bagas Assyafah)" />
+    <meta
+      name="keywords"
+      content="Minecraft mods, Fabric mods, Minecraft Java mods, Modrinth, bearaujus, server-side mods, dimension notifier, death respawn notifier, improved sleep, sleep notifier"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={canonical} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#0b0d10" />
 
     <!-- Open Graph / social -->
@@ -45,6 +54,9 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta property="og:image:alt" content="bearaujus — server-first Minecraft Fabric mods, live on Modrinth" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
+
+    <!-- Per-page structured data and extra head tags -->
+    <slot name="head" />
 
     <!-- Make scroll-reveal opt-in only when JS runs -->
     <script is:inline>

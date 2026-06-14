@@ -8,16 +8,74 @@ import Principles from '../components/Principles.astro';
 import About from '../components/About.astro';
 import Footer from '../components/Footer.astro';
 
-import { MODS } from '../data/mods';
+import { MODS, MC_VERSION, LOADER, MODRINTH_USER } from '../data/mods';
 import { getStats, totals } from '../lib/modrinth';
 
 // Live Modrinth stats, fetched at build time (falls back to static counts).
 const stats = await getStats();
 const t = totals(stats);
 const statFor = (id: string) => stats[id] ?? { downloads: 0, followers: 0 };
+
+const site = Astro.site?.href.replace(/\/$/, '') ?? 'https://modrinth.bearaujus.com';
+
+// Schema.org structured data for rich search results.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: `${site}/`,
+      name: 'bearaujus — Minecraft Fabric Mods',
+      description:
+        'Server-first Minecraft: Java Edition mods for Fabric by bearaujus, published on Modrinth.',
+      inLanguage: 'en',
+      publisher: { '@id': `${site}/#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${site}/#person`,
+      name: 'Haryo Bagas Assyafah',
+      alternateName: 'bearaujus',
+      url: `${site}/`,
+      jobTitle: 'Software Engineer',
+      sameAs: [MODRINTH_USER, 'https://github.com/bearaujus'],
+    },
+    {
+      '@type': 'ItemList',
+      name: 'Minecraft Fabric mods by bearaujus',
+      itemListOrder: 'https://schema.org/ItemListOrderDescending',
+      numberOfItems: MODS.length,
+      itemListElement: MODS.map((mod, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'SoftwareApplication',
+          name: mod.name,
+          description: mod.tagline,
+          url: `https://modrinth.com/mod/${mod.slug}`,
+          applicationCategory: 'GameApplication',
+          operatingSystem: `Minecraft Java Edition ${MC_VERSION} (${LOADER})`,
+          author: { '@id': `${site}/#person` },
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          interactionStatistic: {
+            '@type': 'InteractionCounter',
+            interactionType: 'https://schema.org/DownloadAction',
+            userInteractionCount: statFor(mod.modrinthId).downloads,
+          },
+        },
+      })),
+    },
+  ],
+};
 ---
 
 <Base>
+  <script
+    type="application/ld+json"
+    slot="head"
+    set:html={JSON.stringify(jsonLd)}
+  />
   <Nav />
   <main>
     <Hero totalDownloads={t.downloads} />
