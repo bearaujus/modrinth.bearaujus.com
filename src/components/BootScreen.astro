@@ -23,13 +23,40 @@
       return;
     }
 
+    const minimumVisibleMs = 320;
+    let firstPaintAt;
+    let finishTimer;
+    let ready = false;
     let finished = false;
-    const timeout = window.setTimeout(complete, 1200);
+    const timeout = window.setTimeout(markReady, 1200);
+
+    // Start the minimum-visible interval at a rendering opportunity, not when
+    // this script is parsed. On throttled connections the load event can fire
+    // before the browser paints, which otherwise turns the loader into a blank
+    // dark frame.
+    requestAnimationFrame(() => {
+      firstPaintAt = performance.now();
+      maybeFinish();
+    });
+
+    function markReady() {
+      ready = true;
+      window.clearTimeout(timeout);
+      maybeFinish();
+    }
+
+    function maybeFinish() {
+      if (!ready || firstPaintAt === undefined || finishTimer !== undefined) return;
+
+      const elapsed = performance.now() - firstPaintAt;
+      finishTimer = window.setTimeout(complete, Math.max(0, minimumVisibleMs - elapsed));
+    }
 
     function complete() {
       if (finished) return;
       finished = true;
       window.clearTimeout(timeout);
+      if (finishTimer !== undefined) window.clearTimeout(finishTimer);
 
       requestAnimationFrame(() => {
         root.dataset.boot = 'complete';
@@ -43,8 +70,8 @@
       });
     }
 
-    if (document.readyState === 'complete') complete();
-    else window.addEventListener('load', complete, { once: true });
+    if (document.readyState === 'complete') markReady();
+    else window.addEventListener('load', markReady, { once: true });
   })();
 </script>
 
