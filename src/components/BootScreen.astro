@@ -24,39 +24,27 @@
     }
 
     const minimumVisibleMs = 320;
-    let firstPaintAt;
-    let finishTimer;
-    let ready = false;
-    let finished = false;
-    const timeout = window.setTimeout(markReady, 1200);
+    let exitStarted = false;
+    let revealTimer;
+    const timeout = window.setTimeout(beginExit, 1200);
 
-    // Start the minimum-visible interval at a rendering opportunity, not when
-    // this script is parsed. On throttled connections the load event can fire
-    // before the browser paints, which otherwise turns the loader into a blank
-    // dark frame.
-    requestAnimationFrame(() => {
-      firstPaintAt = performance.now();
-      maybeFinish();
-    });
-
-    function markReady() {
-      ready = true;
+    function beginExit() {
+      if (exitStarted) return;
+      exitStarted = true;
       window.clearTimeout(timeout);
-      maybeFinish();
+
+      // Two frames form a paint barrier: even if parsing or font work blocks
+      // the main thread, the exit countdown cannot be consumed before the
+      // loader has had a rendering opportunity.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          revealTimer = window.setTimeout(revealPage, minimumVisibleMs);
+        });
+      });
     }
 
-    function maybeFinish() {
-      if (!ready || firstPaintAt === undefined || finishTimer !== undefined) return;
-
-      const elapsed = performance.now() - firstPaintAt;
-      finishTimer = window.setTimeout(complete, Math.max(0, minimumVisibleMs - elapsed));
-    }
-
-    function complete() {
-      if (finished) return;
-      finished = true;
-      window.clearTimeout(timeout);
-      if (finishTimer !== undefined) window.clearTimeout(finishTimer);
+    function revealPage() {
+      if (revealTimer !== undefined) window.clearTimeout(revealTimer);
 
       requestAnimationFrame(() => {
         root.dataset.boot = 'complete';
@@ -70,8 +58,8 @@
       });
     }
 
-    if (document.readyState === 'complete') markReady();
-    else window.addEventListener('load', markReady, { once: true });
+    if (document.readyState === 'complete') beginExit();
+    else window.addEventListener('load', beginExit, { once: true });
   })();
 </script>
 
