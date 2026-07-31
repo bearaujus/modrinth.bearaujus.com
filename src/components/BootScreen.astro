@@ -1,0 +1,174 @@
+<!--
+  A progressive boot state for genuinely slow first visits. It is enabled by
+  the tiny head script in Base.astro, so no-JS and script-failure paths always
+  render the page normally instead of trapping visitors behind a loader.
+-->
+<div class="boot-screen" data-boot-screen aria-hidden="true">
+  <div class="boot-panel">
+    <span class="boot-mark" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </span>
+    <p class="boot-brand">bearaujus</p>
+    <p class="boot-status">Loading world<span class="boot-dots">...</span></p>
+    <span class="boot-track" aria-hidden="true"><span></span></span>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const screen = document.querySelector('[data-boot-screen]');
+    if (!(screen instanceof HTMLElement)) {
+      delete root.dataset.boot;
+      return;
+    }
+
+    let finished = false;
+    const timeout = window.setTimeout(complete, 1200);
+
+    function complete() {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(timeout);
+
+      requestAnimationFrame(() => {
+        root.dataset.boot = 'complete';
+
+        // Keep the node just long enough for the exit transition, then remove
+        // all boot-only state so back/forward-cache restores are immediate.
+        window.setTimeout(() => {
+          screen.remove();
+          delete root.dataset.boot;
+        }, 400);
+      });
+    }
+
+    if (document.readyState === 'complete') complete();
+    else window.addEventListener('load', complete, { once: true });
+  })();
+</script>
+
+<style>
+  .boot-screen {
+    display: none;
+  }
+
+  :global(html[data-boot='pending']) .boot-screen,
+  :global(html[data-boot='complete']) .boot-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(95, 208, 104, 0.09), transparent 34rem),
+      #0b0d10;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.28s var(--ease), visibility 0.28s step-end;
+  }
+
+  :global(html[data-boot='complete']) .boot-screen {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .boot-panel {
+    display: grid;
+    justify-items: center;
+    width: min(100%, 18rem);
+  }
+
+  .boot-mark {
+    display: grid;
+    grid-template-columns: repeat(2, 9px);
+    grid-template-rows: repeat(2, 9px);
+    gap: 3px;
+    filter: drop-shadow(0 0 10px rgba(95, 208, 104, 0.28));
+  }
+
+  .boot-mark span:nth-child(1) { background: #5fd068; }
+  .boot-mark span:nth-child(2) { background: #e0533a; }
+  .boot-mark span:nth-child(3) { background: #b18cff; }
+  .boot-mark span:nth-child(4) { background: #f2b84b; }
+
+  .boot-brand {
+    margin-top: 0.9rem;
+    color: #e8edf2;
+    font-family: var(--font-pixel);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+
+  .boot-status {
+    margin-top: 1.5rem;
+    color: #939dab;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .boot-dots {
+    display: inline-block;
+    width: 1.8em;
+    overflow: hidden;
+    vertical-align: bottom;
+    clip-path: inset(0 100% 0 0);
+    animation: boot-dots 0.9s steps(4, end) infinite;
+  }
+
+  .boot-track {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    margin-top: 0.8rem;
+    overflow: hidden;
+    background: #252b33;
+  }
+
+  .boot-track span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 42%;
+    background: #5fd068;
+    box-shadow: 0 0 12px rgba(95, 208, 104, 0.5);
+    animation: boot-progress 0.9s var(--ease) infinite;
+  }
+
+  @keyframes boot-dots {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0); }
+  }
+
+  @keyframes boot-progress {
+    from { transform: translateX(-110%); }
+    to { transform: translateX(350%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html[data-boot='pending']) .boot-screen,
+    :global(html[data-boot='complete']) .boot-screen {
+      transition: none;
+    }
+
+    .boot-dots,
+    .boot-track span {
+      animation: none;
+    }
+
+    .boot-track span {
+      width: 100%;
+      opacity: 0.65;
+    }
+  }
+
+  @media print {
+    .boot-screen {
+      display: none !important;
+    }
+  }
+</style>

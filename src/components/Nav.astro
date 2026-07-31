@@ -4,7 +4,7 @@ import { MODRINTH_USER } from '../data/mods';
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#top" aria-label="bearaujus — home">
+    <a class="brand" href="/#top" aria-label="bearaujus — home">
       <span class="brand-mark" aria-hidden="true">
         <span style="background:var(--ovr)"></span>
         <span style="background:var(--net)"></span>
@@ -15,12 +15,18 @@ import { MODRINTH_USER } from '../data/mods';
     </a>
 
     <nav class="nav-links" aria-label="Primary navigation">
-      <a href="#mods">Mods</a>
-      <a href="#approach">Approach</a>
-      <a href="#about">About</a>
+      <a href="/#mods">Mods</a>
+      <a href="/#approach">Approach</a>
+      <a href="/#about">About</a>
     </nav>
 
-    <a class="btn btn-ghost nav-cta" href={MODRINTH_USER} target="_blank" rel="noopener noreferrer">
+    <a
+      class="btn btn-ghost nav-cta"
+      href={MODRINTH_USER}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="bearaujus on Modrinth (opens in a new tab)"
+    >
       Modrinth <span aria-hidden="true">↗</span>
     </a>
   </div>
@@ -31,7 +37,9 @@ import { MODRINTH_USER } from '../data/mods';
     position: sticky;
     top: 0;
     z-index: 50;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    background: rgba(11, 13, 16, 0.92);
     background: color-mix(in srgb, var(--void) 80%, transparent);
     border-bottom: 1px solid var(--line-soft);
   }

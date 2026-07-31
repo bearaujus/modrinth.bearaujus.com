@@ -15,10 +15,15 @@ function init() {
   // Keep anything already in the viewport visible before enabling the hidden
   // state. If this module ever fails to load, CSS leaves all content visible.
   const viewportEdge = window.innerHeight * 0.96;
+  const visible: HTMLElement[] = [];
+
+  // Batch geometry reads before class writes to avoid repeated synchronous
+  // layout as the reveal state is initialized.
   for (const el of els) {
     const rect = el.getBoundingClientRect();
-    if (rect.top < viewportEdge && rect.bottom > 0) el.classList.add('is-in');
+    if (rect.top < viewportEdge && rect.bottom > 0) visible.push(el);
   }
+  visible.forEach((el) => el.classList.add('is-in'));
   document.documentElement.classList.add('reveal-ready');
 
   const io = new IntersectionObserver(

@@ -5,18 +5,22 @@ import '@fontsource/silkscreen/latin-400.css';
 import '@fontsource-variable/inter';
 import '@fontsource/jetbrains-mono/latin-400.css';
 import '@fontsource/jetbrains-mono/latin-600.css';
+import interLatinUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 
 import '../styles/tokens.css';
 import '../styles/global.css';
+import BootScreen from '../components/BootScreen.astro';
 
 export interface Props {
   title?: string;
   description?: string;
+  robots?: string;
 }
 
 const {
   title = 'Server-First Minecraft Fabric Mods | bearaujus',
   description = 'Four server-first Minecraft 26.2.x Fabric mods by bearaujus: dimension cues, death recovery, smarter sleep, and no required client install.',
+  robots = 'index, follow, max-image-preview:large',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -32,15 +36,26 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
+    <script is:inline>
+      // Opt into the boot UI only when JavaScript can also dismiss it.
+      document.documentElement.dataset.boot = 'pending';
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="bearaujus (Haryo Bagas Assyafah)" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="preload"
+      href={interLatinUrl}
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
     <meta name="theme-color" content="#0b0d10" />
 
     <!-- Open Graph / social -->
@@ -66,6 +81,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
 
   </head>
   <body>
+    <BootScreen />
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
   </body>

@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base
+  title="Page not found | bearaujus"
+  description="The requested page could not be found. Return to bearaujus' Minecraft Fabric mods."
+  robots="noindex, nofollow"
+>
+  <Nav />
+  <main id="main-content">
+    <section class="missing" id="top">
+      <div class="wrap missing-inner">
+        <p class="eyebrow">HTTP 404</p>
+        <p class="missing-code" aria-hidden="true">404</p>
+        <h1>That chunk isn't loaded.</h1>
+        <p class="missing-copy">
+          This route does not exist, or it moved somewhere outside the render distance.
+        </p>
+        <div class="missing-actions">
+          <a class="btn btn-primary" href="/">Return home</a>
+          <a class="btn btn-ghost" href="/#mods">Browse the mods</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .missing {
+    min-height: calc(100vh - 60px);
+    min-height: calc(100svh - 60px);
+    display: grid;
+    align-items: center;
+    padding-block: clamp(4rem, 2rem + 8vw, 8rem);
+  }
+
+  .missing-inner {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .missing-code {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    right: clamp(1rem, 8vw, 6rem);
+    color: var(--panel-2);
+    font-family: var(--font-mono);
+    font-size: clamp(8rem, 28vw, 20rem);
+    font-weight: 600;
+    line-height: 0.7;
+    transform: translateY(-50%);
+    user-select: none;
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin-top: 1rem;
+    font-size: var(--step-4);
+  }
+
+  .missing-copy {
+    max-width: 46ch;
+    margin-top: 1.4rem;
+    color: var(--muted);
+    font-size: var(--step-1);
+  }
+
+  .missing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 520px) {
+    .missing-code {
+      top: 15%;
+      right: 1rem;
+      opacity: 0.7;
+      transform: none;
+    }
+  }
+</style>

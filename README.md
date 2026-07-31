@@ -15,7 +15,8 @@ mod showcases present each mod as a clean icon badge.
 
 ## Stack
 
-- **Astro 7** — static output, near-zero client JS (one resilient scroll-reveal script).
+- **Astro 7** — static output, inlined one-page CSS, and near-zero client JS
+  (a fail-safe boot transition plus resilient scroll reveals).
 - **Fontsource** — self-hosted Silkscreen (pixel labels), Inter (body),
   JetBrains Mono (data/chips).
 - **Modrinth API** — live download/follower counts fetched at build time, with a
@@ -27,8 +28,9 @@ mod showcases present each mod as a clean icon badge.
 src/
   data/mods.ts          # release catalog mirror: versions, compatibility, copy, fallback stats
   lib/modrinth.ts       # build-time live stats (with fallback)
-  layouts/Base.astro    # head, fonts, meta
-  components/           # Nav, Hero, ModCard, ModShowcase, Principles, About, Footer
+  layouts/Base.astro    # head, fonts, meta, first-paint safeguards
+  components/           # BootScreen, Nav, Hero, cards, showcases, sections, Footer
+  pages/404.astro       # branded GitHub Pages fallback
   scripts/              # reveal.ts (scroll reveal)
   styles/               # tokens.css, global.css
 public/
@@ -56,7 +58,8 @@ npm run preview  # serve the built site
 `npm run verify` is the local and CI source of truth. It type-checks Astro,
 builds the production site, validates the generated HTML, and checks internal
 fragment links, local asset references, social-image dimensions, JSON-LD,
-manifest files, canonical metadata, and safe external-link attributes.
+manifest files, canonical metadata, safe external-link attributes, the custom
+404 page, and the no-render-blocking-CSS/boot-screen first-paint contract.
 
 The deploy workflow runs on pull requests as a build-only check. Pushes to
 `main` and manual dispatches run the same checks before the GitHub Pages deploy.

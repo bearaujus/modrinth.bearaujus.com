@@ -38,6 +38,10 @@ function metaContent(html, key, value) {
   return undefined;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function pngDimensions(bytes) {
   const signature = '89504e470d0a1a0a';
   check(bytes.length >= 24 && bytes.subarray(0, 8).toString('hex') === signature, 'og.png is not a valid PNG');
@@ -51,12 +55,18 @@ const files = new Set(absoluteFiles.map(relativeFile));
 const htmlFiles = absoluteFiles.filter((file) => file.endsWith('.html'));
 check(htmlFiles.length > 0, 'dist contains no HTML files');
 
-for (const htmlFile of htmlFiles) {
-  const relative = relativeFile(htmlFile);
-  const html = await readFile(htmlFile, 'utf8');
-  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
+const htmlDocuments = new Map(
+  await Promise.all(
+    htmlFiles.map(async (file) => [relativeFile(file), await readFile(file, 'utf8')]),
+  ),
+);
+
+for (const [relative, html] of htmlDocuments) {
+  const idValues = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
+  const ids = new Set(idValues);
   const htmlTag = html.match(/<html\b[^>]*>/)?.[0] ?? '';
   const rootStyle = attributes(htmlTag).style ?? '';
+  const links = [...html.matchAll(/<link\b[^>]*>/g)].map((match) => attributes(match[0]));
 
   check(/<html\b[^>]*\blang="en"/.test(html), `${relative}: missing English document language`);
   check(
@@ -68,9 +78,25 @@ for (const htmlFile of htmlFiles) {
     `${relative}: missing the inline dark root color scheme`,
   );
   check(metaContent(html, 'name', 'color-scheme') === 'dark', `${relative}: missing dark color-scheme metadata`);
+  check(
+    !links.some((attrs) => attrs.rel?.split(/\s+/).includes('stylesheet')),
+    `${relative}: contains a render-blocking external stylesheet`,
+  );
+  check(
+    links.some((attrs) => attrs.rel === 'preload' && attrs.as === 'font' && attrs.type === 'font/woff2'),
+    `${relative}: critical body font is not preloaded`,
+  );
+  check(html.includes('data-boot-screen'), `${relative}: progressive boot screen is missing`);
+  check(html.includes('dataset.boot'), `${relative}: fail-safe boot initializer is missing`);
   check((html.match(/<h1\b/g) ?? []).length === 1, `${relative}: expected exactly one h1`);
+  check(idValues.length === ids.size, `${relative}: duplicate element id found`);
   check(ids.has('main-content'), `${relative}: skip-link target #main-content is missing`);
   check(!/26\.1(?:\.|x|\b)/.test(html), `${relative}: stale Minecraft 26.1 reference found`);
+  check(!/\b(?:href|src)="http:\/\//i.test(html), `${relative}: insecure HTTP asset or link found`);
+
+  const robots = metaContent(html, 'name', 'robots') ?? '';
+  if (relative === '404.html') check(/\bnoindex\b/.test(robots), '404.html: missing noindex directive');
+  else check(/\bindex\b/.test(robots), `${relative}: missing index directive`);
 
   for (const match of html.matchAll(/\bhref="#([^"]+)"/g)) {
     check(ids.has(match[1]), `${relative}: fragment #${match[1]} has no matching id`);
@@ -81,7 +107,23 @@ for (const htmlFile of htmlFiles) {
     let target = decodeURIComponent(url.pathname).replace(/^\//, '');
     if (!target) target = 'index.html';
     const candidates = [target, `${target.replace(/\/$/, '')}/index.html`];
-    check(candidates.some((candidate) => files.has(candidate)), `${relative}: local target ${url.pathname} is missing`);
+    const candidate = candidates.find((file) => files.has(file));
+    check(Boolean(candidate), `${relative}: local target ${url.pathname} is missing`);
+
+    if (candidate?.endsWith('.html') && url.hash) {
+      const targetHtml = htmlDocuments.get(candidate);
+      const id = decodeURIComponent(url.hash.slice(1));
+      check(
+        targetHtml ? new RegExp(`\\bid="${escapeRegExp(id)}"`).test(targetHtml) : false,
+        `${relative}: fragment ${url.hash} has no matching id in ${candidate}`,
+      );
+    }
+  }
+
+  for (const match of html.matchAll(/<img\b[^>]*>/g)) {
+    const attrs = attributes(match[0]);
+    check(Object.hasOwn(attrs, 'alt'), `${relative}: image is missing an alt attribute`);
+    check(/^\d+$/.test(attrs.width ?? '') && /^\d+$/.test(attrs.height ?? ''), `${relative}: image lacks numeric dimensions`);
   }
 
   for (const match of html.matchAll(/<a\b[^>]*\btarget="_blank"[^>]*>/g)) {
@@ -89,13 +131,11 @@ for (const htmlFile of htmlFiles) {
     check(rel.includes('noopener') && rel.includes('noreferrer'), `${relative}: target=_blank link lacks safe rel tokens`);
   }
 
-  const canonical = [...html.matchAll(/<link\b[^>]*>/g)]
-    .map((match) => attributes(match[0]))
-    .find((attrs) => attrs.rel === 'canonical')?.href;
+  const canonical = links.find((attrs) => attrs.rel === 'canonical')?.href;
   check(canonical?.startsWith(`${SITE}/`) === true, `${relative}: canonical URL is missing or off-site`);
 
   const jsonLdMatch = html.match(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
-  check(Boolean(jsonLdMatch), `${relative}: JSON-LD is missing`);
+  if (relative === 'index.html') check(Boolean(jsonLdMatch), `${relative}: JSON-LD is missing`);
   if (jsonLdMatch) {
     try {
       JSON.parse(jsonLdMatch[1]);
@@ -106,6 +146,7 @@ for (const htmlFile of htmlFiles) {
 }
 
 for (const required of [
+  '404.html',
   'CNAME',
   'favicon.svg',
   'icon-192.png',
@@ -119,7 +160,7 @@ for (const required of [
   check(files.has(required), `dist/${required} is missing`);
 }
 
-const indexHtml = await readFile(path.join(DIST, 'index.html'), 'utf8');
+const indexHtml = htmlDocuments.get('index.html') ?? '';
 const ogBytes = await readFile(path.join(DIST, 'og.png'));
 const og = pngDimensions(ogBytes);
 check(metaContent(indexHtml, 'property', 'og:image:width') === String(og.width), 'og:image:width does not match og.png');
@@ -131,6 +172,10 @@ check(cname === 'modrinth.bearaujus.com', 'CNAME does not match the production d
 
 const robots = await readFile(path.join(DIST, 'robots.txt'), 'utf8');
 check(robots.includes(`${SITE}/sitemap-index.xml`), 'robots.txt does not reference the production sitemap');
+
+const sitemapFiles = [...files].filter((file) => /^sitemap.*\.xml$/.test(file));
+const sitemap = (await Promise.all(sitemapFiles.map((file) => readFile(path.join(DIST, file), 'utf8')))).join('\n');
+check(!sitemap.includes(`${SITE}/404`), 'sitemap must not include the 404 page');
 
 const manifest = JSON.parse(await readFile(path.join(DIST, 'site.webmanifest'), 'utf8'));
 check(manifest.id === '/' && manifest.start_url === '/' && manifest.scope === '/', 'web manifest navigation scope is incomplete');
