@@ -21,13 +21,17 @@ const {
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
+
+// This root-level color paints before the render-blocking stylesheet arrives.
+// Keep it in sync with --void in styles/tokens.css.
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background-color: #0b0d10; color-scheme: dark;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="bearaujus (Haryo Bagas Assyafah)" />

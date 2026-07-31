@@ -55,8 +55,19 @@ for (const htmlFile of htmlFiles) {
   const relative = relativeFile(htmlFile);
   const html = await readFile(htmlFile, 'utf8');
   const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
+  const htmlTag = html.match(/<html\b[^>]*>/)?.[0] ?? '';
+  const rootStyle = attributes(htmlTag).style ?? '';
 
   check(/<html\b[^>]*\blang="en"/.test(html), `${relative}: missing English document language`);
+  check(
+    /(?:^|;)\s*background-color\s*:\s*#0b0d10\s*(?:;|$)/i.test(rootStyle),
+    `${relative}: missing the inline dark canvas color that prevents a white first-paint flash`,
+  );
+  check(
+    /(?:^|;)\s*color-scheme\s*:\s*dark\s*(?:;|$)/i.test(rootStyle),
+    `${relative}: missing the inline dark root color scheme`,
+  );
+  check(metaContent(html, 'name', 'color-scheme') === 'dark', `${relative}: missing dark color-scheme metadata`);
   check((html.match(/<h1\b/g) ?? []).length === 1, `${relative}: expected exactly one h1`);
   check(ids.has('main-content'), `${relative}: skip-link target #main-content is missing`);
   check(!/26\.1(?:\.|x|\b)/.test(html), `${relative}: stale Minecraft 26.1 reference found`);
