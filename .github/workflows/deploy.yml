@@ -20,7 +20,7 @@ jobs:
       - name: Build with Astro
         uses: withastro/action@e84f40bd8d2caa9e768ec82ad30dd81f0b280853 # v6
         with:
-          node-version: 24
+          node-version: 22
           build-cmd: npm run verify
         # Builds the site and uploads dist/ as a Pages artifact.
         # public/CNAME (modrinth.bearaujus.com) ships inside dist/.

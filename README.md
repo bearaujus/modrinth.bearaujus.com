@@ -40,9 +40,10 @@ public/
 
 ## Develop
 
-Use Node 22.12+ or Node 24. Node 25 is intentionally excluded because it is not
-an LTS deployment target and currently triggers a Windows libuv shutdown
-assertion after otherwise successful Astro builds.
+Use Node 22.12+ on the Node 22 line; `.nvmrc`, `package.json`, and CI all enforce
+that tested runtime. Newer Node lines are intentionally excluded because the
+current Astro toolchain can trigger a Windows libuv shutdown assertion after an
+otherwise successful build.
 
 ```bash
 npm ci
