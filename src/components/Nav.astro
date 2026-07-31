@@ -14,14 +14,14 @@ import { MODRINTH_USER } from '../data/mods';
       <span class="brand-name">bearaujus</span>
     </a>
 
-    <nav class="nav-links" aria-label="Sections">
+    <nav class="nav-links" aria-label="Primary navigation">
       <a href="#mods">Mods</a>
       <a href="#approach">Approach</a>
       <a href="#about">About</a>
     </nav>
 
     <a class="btn btn-ghost nav-cta" href={MODRINTH_USER} target="_blank" rel="noopener noreferrer">
-      Modrinth ↗
+      Modrinth <span aria-hidden="true">↗</span>
     </a>
   </div>
 </header>
@@ -46,6 +46,7 @@ import { MODRINTH_USER } from '../data/mods';
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
+    min-width: 0;
   }
   .brand-mark {
     display: grid;
@@ -77,6 +78,7 @@ import { MODRINTH_USER } from '../data/mods';
   }
   .nav-cta {
     padding: 0.5rem 0.8rem;
+    flex-shrink: 0;
   }
   @media (min-width: 760px) {
     .nav-links {

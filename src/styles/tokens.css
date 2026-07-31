@@ -15,7 +15,8 @@
   /* --- ink --- */
   --ink: #e8edf2;
   --muted: #939dab;
-  --faint: #5c656f;
+  /* Keeps secondary 12px text above WCAG AA contrast on the darkest surface. */
+  --faint: #7f8995;
 
   /* --- dimension / day-cycle accents (meaningful) --- */
   --ovr: #5fd068; /* Overworld — the lead/brand accent */

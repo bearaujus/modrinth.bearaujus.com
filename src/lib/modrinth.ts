@@ -11,10 +11,19 @@ import { MODS } from '../data/mods';
 export type Stat = { downloads: number; followers: number };
 
 const API = 'https://api.modrinth.com/v2/projects';
+const REQUEST_TIMEOUT_MS = 8000;
 // Modrinth asks API consumers to identify themselves.
-const UA = 'modrinth.bearaujus.com (portfolio site; github.com/bearaujus)';
+const UA =
+  'modrinth.bearaujus.com (portfolio site; github.com/bearaujus/modrinth.bearaujus.com)';
+const KNOWN_PROJECT_IDS = new Set(MODS.map((mod) => mod.modrinthId));
 
 export type StatsMap = Record<string, Stat>;
+
+function validMetric(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : fallback;
+}
 
 function fallbackMap(): StatsMap {
   const out: StatsMap = {};
@@ -29,31 +38,32 @@ function fallbackMap(): StatsMap {
 export async function getStats(): Promise<StatsMap> {
   const ids = MODS.map((m) => m.modrinthId);
   const url = `${API}?ids=${encodeURIComponent(JSON.stringify(ids))}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(url, {
       headers: { 'User-Agent': UA, Accept: 'application/json' },
       signal: controller.signal,
     });
-    clearTimeout(timer);
     if (!res.ok) throw new Error(`Modrinth API ${res.status}`);
 
-    const data = (await res.json()) as Array<{
-      id: string;
-      downloads: number;
-      followers: number;
-    }>;
+    const data: unknown = await res.json();
+    if (!Array.isArray(data)) throw new Error('Modrinth API returned an invalid project list');
 
     const out = fallbackMap();
-    for (const p of data) {
-      if (p && typeof p.id === 'string') {
-        out[p.id] = {
-          downloads: p.downloads ?? out[p.id]?.downloads ?? 0,
-          followers: p.followers ?? out[p.id]?.followers ?? 0,
-        };
-      }
+    for (const project of data) {
+      if (!project || typeof project !== 'object') continue;
+      const record = project as Record<string, unknown>;
+      const id = record.id;
+      if (typeof id !== 'string' || !KNOWN_PROJECT_IDS.has(id)) continue;
+
+      const fallback = out[id];
+      if (!fallback) continue;
+      out[id] = {
+        downloads: validMetric(record.downloads, fallback.downloads),
+        followers: validMetric(record.followers, fallback.followers),
+      };
     }
     return out;
   } catch (err) {
@@ -63,6 +73,8 @@ export async function getStats(): Promise<StatsMap> {
       }`,
     );
     return fallbackMap();
+  } finally {
+    clearTimeout(timer);
   }
 }
 

@@ -6,34 +6,45 @@
    ============================================================ */
 
 export type Accent = 'ovr' | 'net' | 'end' | 'dawn';
+export type InstallSide = 'required' | 'optional' | 'unsupported';
 
-export type Mod = {
-  id: string;
-  name: string;
-  slug: string;
+export type Mod = Readonly<{
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  /** exact current Modrinth version number */
+  readonly releaseVersion: string;
   /** Modrinth project id, used for the live stats API */
-  modrinthId: string;
+  readonly modrinthId: string;
   /** the mod's signature accent in the palette */
-  accent: Accent;
-  tagline: string;
+  readonly accent: Accent;
+  readonly tagline: string;
   /** the lead feature bullets */
-  bullets: string[];
-  categories: string[];
+  readonly bullets: readonly string[];
+  readonly categories: readonly string[];
   /** environment support */
-  env: { client: string; server: string };
+  readonly env: Readonly<{ client: InstallSide; server: InstallSide }>;
   /** fallback metrics if the API is down */
-  fallback: { downloads: number; followers: number };
-};
+  readonly fallback: Readonly<{ downloads: number; followers: number }>;
+}>;
 
-export const MC_VERSION = '26.1.2';
+/** Exact release used for build and runtime validation. */
+export const MC_VERSION = '26.2';
+/** Patch-tolerant public compatibility line declared by every listed mod. */
+export const MC_SERIES = '26.2.x';
+export const MC_RANGE = '>=26.2 <26.3';
 export const LOADER = 'Fabric';
+export const LOADER_MIN_VERSION = '0.19.0';
+export const FABRIC_API_MIN_VERSION = '0.147.1+26.2';
+export const CATALOG_REVIEWED_AT = '2026-07-31';
 export const MODRINTH_USER = 'https://modrinth.com/user/bearaujus';
 
-export const MODS: Mod[] = [
+export const MODS = [
   {
     id: 'dimension-notifier',
     name: 'Dimension Notifier',
     slug: 'dimension-notifier',
+    releaseVersion: '0.2.4+26.2',
     modrinthId: 'kpwhwrp4',
     accent: 'end',
     tagline:
@@ -46,12 +57,13 @@ export const MODS: Mod[] = [
     ],
     categories: ['social', 'technology', 'utility'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 88, followers: 3 },
+    fallback: { downloads: 127, followers: 3 },
   },
   {
     id: 'death-respawn-notifier',
     name: 'Death Respawn Notifier',
     slug: 'death-respawn-notifier',
+    releaseVersion: '0.2.4+26.2',
     modrinthId: 'WmLlAWdJ',
     accent: 'net',
     tagline:
@@ -64,12 +76,13 @@ export const MODS: Mod[] = [
     ],
     categories: ['social', 'technology', 'utility'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 63, followers: 2 },
+    fallback: { downloads: 141, followers: 3 },
   },
   {
     id: 'improved-sleep',
     name: 'Improved Sleep',
     slug: 'improved-sleep',
+    releaseVersion: '0.1.3+26.2',
     modrinthId: 'q7ix822L',
     accent: 'end',
     tagline:
@@ -82,12 +95,13 @@ export const MODS: Mod[] = [
     ],
     categories: ['game-mechanics', 'utility'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 28, followers: 0 },
+    fallback: { downloads: 80, followers: 0 },
   },
   {
     id: 'sleep-wake-up-notifier',
     name: 'Sleep Wake-Up Notifier',
     slug: 'sleep-wake-up-notifier',
+    releaseVersion: '0.1.3+26.2',
     modrinthId: 'DBW4p9Pt',
     accent: 'dawn',
     tagline:
@@ -100,6 +114,6 @@ export const MODS: Mod[] = [
     ],
     categories: ['social', 'utility'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 43, followers: 0 },
+    fallback: { downloads: 170, followers: 0 },
   },
-];
+] satisfies readonly Mod[];

@@ -1,5 +1,5 @@
 ---
-import { MC_VERSION } from '../data/mods';
+import { MC_SERIES, MC_VERSION } from '../data/mods';
 
 // What every mod has in common — framed around the public, user-facing
 // promises on each Modrinth listing, not internal tooling.
@@ -14,7 +14,7 @@ const principles = [
   {
     code: 'VER',
     title: 'Exact, tested compatibility',
-    body: `Each mod claims only the Minecraft versions it has actually run on — currently Java ${MC_VERSION} — so a listing never promises a version it hasn't booted.`,
+    body: `Each mod is built and boot-tested on Minecraft: Java Edition ${MC_VERSION}, with patch-tolerant support inside ${MC_SERIES}. New minor lines are never claimed before they pass the full runtime matrix.`,
     accent: 'net',
   },
   {

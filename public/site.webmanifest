@@ -2,8 +2,11 @@
   "name": "bearaujus — Minecraft Fabric Mods",
   "short_name": "bearaujus mods",
   "description": "Server-first Minecraft: Java Edition mods for Fabric by bearaujus.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "categories": ["games", "utilities"],
   "background_color": "#0b0d10",
   "theme_color": "#0b0d10",
   "icons": [

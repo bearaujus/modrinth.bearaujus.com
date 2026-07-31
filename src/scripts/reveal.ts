@@ -12,6 +12,15 @@ function init() {
     return;
   }
 
+  // Keep anything already in the viewport visible before enabling the hidden
+  // state. If this module ever fails to load, CSS leaves all content visible.
+  const viewportEdge = window.innerHeight * 0.96;
+  for (const el of els) {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < viewportEdge && rect.bottom > 0) el.classList.add('is-in');
+  }
+  document.documentElement.classList.add('reveal-ready');
+
   const io = new IntersectionObserver(
     (entries, obs) => {
       for (const e of entries) {
@@ -23,7 +32,7 @@ function init() {
     },
     { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
   );
-  els.forEach((el) => io.observe(el));
+  els.filter((el) => !el.classList.contains('is-in')).forEach((el) => io.observe(el));
 }
 
 if (document.readyState === 'loading') {

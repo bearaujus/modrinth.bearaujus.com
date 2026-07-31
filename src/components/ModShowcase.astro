@@ -1,7 +1,12 @@
 ---
 import type { Mod } from '../data/mods';
 import type { Stat } from '../lib/modrinth';
-import { MC_VERSION, LOADER } from '../data/mods';
+import {
+  FABRIC_API_MIN_VERSION,
+  LOADER,
+  LOADER_MIN_VERSION,
+  MC_SERIES,
+} from '../data/mods';
 
 interface Props {
   mod: Mod;
@@ -33,14 +38,25 @@ const fmt = (n: number) => n.toLocaleString('en-US');
     </ul>
 
     <div class="show-chips">
+      <span class="chip">release <strong>{mod.releaseVersion}</strong></span>
       <span class="chip"><strong>{LOADER}</strong></span>
-      <span class="chip">MC <strong>{MC_VERSION}</strong></span>
+      <span class="chip">MC <strong>{MC_SERIES}</strong></span>
       <span class="chip">server <strong>{mod.env.server}</strong></span>
       <span class="chip">client <strong>{mod.env.client}</strong></span>
     </div>
 
+    <p class="show-runtime">
+      Runtime minimums: Fabric Loader {LOADER_MIN_VERSION} · Fabric API {FABRIC_API_MIN_VERSION}
+    </p>
+
     <div class="show-foot">
-      <a class="btn btn-primary" href={href} target="_blank" rel="noopener noreferrer">
+      <a
+        class="btn btn-primary"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Get ${mod.name} ${mod.releaseVersion} on Modrinth (opens in a new tab)`}
+      >
         Get on Modrinth ↗
       </a>
       <span class="show-metric">
@@ -55,10 +71,11 @@ const fmt = (n: number) => n.toLocaleString('en-US');
       <img
         class="badge-icon"
         src={`/mods/${mod.slug}/icon.png`}
-        alt={`${mod.name} icon`}
+        alt=""
         width="320"
         height="320"
         loading="lazy"
+        decoding="async"
       />
     </div>
   </div>
@@ -137,6 +154,13 @@ const fmt = (n: number) => n.toLocaleString('en-US');
     flex-wrap: wrap;
     align-items: center;
     gap: 1rem 1.4rem;
+  }
+  .show-runtime {
+    margin-top: 0.8rem;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    overflow-wrap: anywhere;
   }
   .show-metric {
     font-size: 0.8rem;

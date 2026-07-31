@@ -1,9 +1,10 @@
 ---
-// Self-hosted fonts (bundled at build, no runtime network call)
-import '@fontsource/silkscreen/400.css';
+// Self-hosted fonts (bundled at build, no runtime network call).
+// The static display/mono faces only need the Latin subset used by this site.
+import '@fontsource/silkscreen/latin-400.css';
 import '@fontsource-variable/inter';
-import '@fontsource/jetbrains-mono/400.css';
-import '@fontsource/jetbrains-mono/600.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-600.css';
 
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -14,8 +15,8 @@ export interface Props {
 }
 
 const {
-  title = 'Minecraft Fabric Mods by bearaujus — Server-First Java Mods',
-  description = 'Four free, server-first Minecraft: Java Edition mods for Fabric by bearaujus — dimension cues, death recovery, and smarter sleep. Live on Modrinth, no client install required.',
+  title = 'Server-First Minecraft Fabric Mods | bearaujus',
+  description = 'Four server-first Minecraft 26.2.x Fabric mods by bearaujus: dimension cues, death recovery, smarter sleep, and no required client install.',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -23,17 +24,13 @@ const ogImage = new URL('/og.png', Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="bearaujus (Haryo Bagas Assyafah)" />
-    <meta
-      name="keywords"
-      content="Minecraft mods, Fabric mods, Minecraft Java mods, Modrinth, bearaujus, server-side mods, dimension notifier, death respawn notifier, improved sleep, sleep notifier"
-    />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={canonical} />
 
@@ -48,22 +45,24 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="modrinth.bearaujus.com" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
     <meta property="og:image:alt" content="bearaujus — server-first Minecraft Fabric mods, live on Modrinth" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="bearaujus — server-first Minecraft Fabric mods, live on Modrinth" />
 
     <!-- Per-page structured data and extra head tags -->
     <slot name="head" />
 
-    <!-- Make scroll-reveal opt-in only when JS runs -->
-    <script is:inline>
-      document.documentElement.classList.remove('no-js');
-    </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
   </body>
 </html>

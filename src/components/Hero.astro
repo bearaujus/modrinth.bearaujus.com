@@ -1,5 +1,5 @@
 ---
-import { MC_VERSION, LOADER, MODS } from '../data/mods';
+import { MC_SERIES, LOADER, MODS } from '../data/mods';
 
 interface Props {
   totalDownloads: number;
@@ -10,26 +10,24 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 
 <section class="hero section" id="top">
   <div class="wrap hero-inner">
-    <p class="eyebrow" data-reveal>Fabric mods · Minecraft Java {MC_VERSION}</p>
+    <p class="eyebrow">Fabric mods · Minecraft Java {MC_SERIES}</p>
 
-    <h1 class="hero-title" data-reveal style="--reveal-delay:0.05s">
-      Small server mods that
-      <span class="hl">say the right thing</span>
-      at the right moment.
+    <h1 class="hero-title">
+      Small server mods that{' '}<span class="hl">say the right thing</span>{' '}at the right moment.
     </h1>
 
-    <p class="hero-sub" data-reveal style="--reveal-delay:0.12s">
+    <p class="hero-sub">
       I build server-first {LOADER} mods that live in Minecraft's own action bar,
       chat, and Tab list — dimension cues, death recovery, and smarter sleep.
       No client install required.
     </p>
 
-    <div class="hero-cta" data-reveal style="--reveal-delay:0.18s">
+    <div class="hero-cta">
       <a class="btn btn-primary" href="#mods">View the mods</a>
       <a class="btn btn-ghost" href="#approach">What they share</a>
     </div>
 
-    <dl class="hero-stats" data-reveal style="--reveal-delay:0.24s">
+    <dl class="hero-stats">
       <div>
         <dt>Published mods</dt>
         <dd>{MODS.length}</dd>
@@ -40,7 +38,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
       </div>
       <div>
         <dt>Game version</dt>
-        <dd class="mono">{MC_VERSION}</dd>
+        <dd class="mono">{MC_SERIES}</dd>
       </div>
     </dl>
   </div>
@@ -56,6 +54,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
     font-size: var(--step-4);
     margin-top: 1.1rem;
     max-width: 16ch;
+    overflow-wrap: break-word;
   }
   .hero-title .hl {
     color: var(--ovr);

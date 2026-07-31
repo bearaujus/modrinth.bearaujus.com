@@ -15,7 +15,7 @@ mod showcases present each mod as a clean icon badge.
 
 ## Stack
 
-- **Astro 6** — static output, near-zero client JS (one small scroll-reveal script).
+- **Astro 7** — static output, near-zero client JS (one resilient scroll-reveal script).
 - **Fontsource** — self-hosted Silkscreen (pixel labels), Inter (body),
   JetBrains Mono (data/chips).
 - **Modrinth API** — live download/follower counts fetched at build time, with a
@@ -25,7 +25,7 @@ mod showcases present each mod as a clean icon badge.
 
 ```
 src/
-  data/mods.ts          # source of truth for mod copy + fallback stats
+  data/mods.ts          # release catalog mirror: versions, compatibility, copy, fallback stats
   lib/modrinth.ts       # build-time live stats (with fallback)
   layouts/Base.astro    # head, fonts, meta
   components/           # Nav, Hero, ModCard, ModShowcase, Principles, About, Footer
@@ -38,17 +38,44 @@ public/
 
 ## Develop
 
+Use Node 22.12+ or Node 24. Node 25 is intentionally excluded because it is not
+an LTS deployment target and currently triggers a Windows libuv shutdown
+assertion after otherwise successful Astro builds.
+
 ```bash
-npm install
+npm ci
 npm run dev      # http://localhost:4321
-npm run build    # static output -> dist/
+npm run check    # Astro + TypeScript diagnostics
+npm run verify   # diagnostics + build + HTML/output integrity checks
+npm test         # same complete verification workflow
 npm run preview  # serve the built site
 ```
 
+## Quality gates
+
+`npm run verify` is the local and CI source of truth. It type-checks Astro,
+builds the production site, validates the generated HTML, and checks internal
+fragment links, local asset references, social-image dimensions, JSON-LD,
+manifest files, canonical metadata, and safe external-link attributes.
+
+The deploy workflow runs on pull requests as a build-only check. Pushes to
+`main` and manual dispatches run the same checks before the GitHub Pages deploy.
+Dependabot keeps npm packages and GitHub Actions visible through grouped weekly
+update pull requests.
+
+## Release catalog refresh
+
+`src/data/mods.ts` mirrors the public release registry in the Minecraft addons
+repository. For every mod release, update the exact Modrinth version number,
+Minecraft compatibility line, runtime dependency minimums, user-facing copy,
+and offline fallback metrics. Keep the four icons aligned with each addon's
+`release/icon.png`, update `public/og.png` when its footer changes, then run
+`npm run verify` before deployment.
+
 ## Deploy (GitHub Pages + custom domain)
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and publishes
-`dist/` to GitHub Pages. One-time setup:
+Pushing to `main` runs `.github/workflows/deploy.yml`, which verifies and
+publishes `dist/` to GitHub Pages. One-time setup:
 
 1. **GitHub → Settings → Pages → Source = GitHub Actions.**
 2. After the first deploy, set **Custom domain = `modrinth.bearaujus.com`** and

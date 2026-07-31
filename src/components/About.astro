@@ -1,7 +1,7 @@
 ---
 import { totals } from '../lib/modrinth';
 import type { StatsMap } from '../lib/modrinth';
-import { MODRINTH_USER, MC_VERSION } from '../data/mods';
+import { MODRINTH_USER, MC_SERIES, MC_VERSION } from '../data/mods';
 
 interface Props {
   stats: StatsMap;
@@ -11,9 +11,14 @@ const t = totals(stats);
 const fmt = (n: number) => n.toLocaleString('en-US');
 
 const links = [
-  { label: 'Modrinth', value: 'bearaujus', href: MODRINTH_USER },
-  { label: 'GitHub', value: 'bearaujus', href: 'https://github.com/bearaujus' },
-  { label: 'Email', value: 'modrinth@bearaujus.com', href: 'mailto:modrinth@bearaujus.com' },
+  { label: 'Modrinth', value: 'bearaujus', href: MODRINTH_USER, external: true },
+  { label: 'GitHub', value: 'bearaujus', href: 'https://github.com/bearaujus', external: true },
+  {
+    label: 'Email',
+    value: 'modrinth@bearaujus.com',
+    href: 'mailto:modrinth@bearaujus.com',
+    external: false,
+  },
 ];
 ---
 
@@ -28,16 +33,23 @@ const links = [
         My focus is quiet utility: mods that drop onto a Fabric server and make
         a group's day-to-day play clearer, without forcing every player to
         install anything. Each one is built for exact, tested compatibility —
-        currently Minecraft Java {MC_VERSION} — and claims only the versions it
-        has actually run on.
+        currently built and boot-tested on Minecraft Java {MC_VERSION}, with
+        patch-tolerant support across {MC_SERIES}.
       </p>
 
       <ul class="about-links">
         {links.map((l) => (
           <li>
-            <a href={l.href} target="_blank" rel="noopener noreferrer">
+            <a
+              href={l.href}
+              target={l.external ? '_blank' : undefined}
+              rel={l.external ? 'noopener noreferrer' : undefined}
+              aria-label={`${l.label}: ${l.value}${l.external ? ' (opens in a new tab)' : ''}`}
+            >
               <span class="link-label">{l.label}</span>
-              <span class="link-value">{l.value} ↗</span>
+              <span class="link-value">
+                {l.value}{l.external && <span aria-hidden="true"> ↗</span>}
+              </span>
             </a>
           </li>
         ))}
@@ -57,7 +69,7 @@ const links = [
         <span class="stat-num">{fmt(t.followers)}</span>
         <span class="stat-lbl">followers</span>
       </div>
-      <p class="stat-note">Live from the Modrinth API at build time.</p>
+      <p class="stat-note">Refreshed from Modrinth at build time, with offline fallbacks.</p>
     </aside>
   </div>
 </section>
