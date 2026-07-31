@@ -1,7 +1,7 @@
 ---
 import { totals } from '../lib/modrinth';
 import type { StatsMap } from '../lib/modrinth';
-import { MODRINTH_USER, MC_SERIES, MC_VERSION } from '../data/mods';
+import { MODRINTH_USER, MC_SERIES, MC_VERSION, SUPPORT_URL } from '../data/mods';
 
 interface Props {
   stats: StatsMap;
@@ -13,6 +13,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 const links = [
   { label: 'Modrinth', value: 'bearaujus', href: MODRINTH_USER, external: true },
   { label: 'GitHub', value: 'bearaujus', href: 'https://github.com/bearaujus', external: true },
+  { label: 'Support', value: 'Public issue tracker', href: SUPPORT_URL, external: true },
   {
     label: 'Email',
     value: 'modrinth@bearaujus.com',

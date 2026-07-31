@@ -15,7 +15,7 @@ mod showcases present each mod as a clean icon badge.
 
 ## Stack
 
-- **Astro 7** — static output, inlined one-page CSS, and near-zero client JS
+- **Astro 7** — static output, inlined per-page CSS, and near-zero client JS
   (a fail-safe boot transition plus resilient scroll reveals).
 - **Fontsource** — self-hosted Silkscreen (pixel labels), Inter (body),
   JetBrains Mono (data/chips).
@@ -26,24 +26,32 @@ mod showcases present each mod as a clean icon badge.
 
 ```
 src/
-  data/mods.ts          # release catalog mirror: versions, compatibility, copy, fallback stats
-  lib/modrinth.ts       # build-time live stats (with fallback)
-  layouts/Base.astro    # head, fonts, meta, first-paint safeguards
-  components/           # BootScreen, Nav, Hero, cards, showcases, sections, Footer
-  pages/404.astro       # branded GitHub Pages fallback
-  scripts/              # reveal.ts (scroll reveal)
-  styles/               # tokens.css, global.css
+  data/mods.ts            # release catalog mirror: versions, compatibility, discovery copy
+  lib/modrinth.ts         # cached build-time live stats (with offline fallbacks)
+  lib/structured-data.ts  # shared Person and SoftwareApplication JSON-LD
+  layouts/Base.astro      # head, fonts, meta, first-paint safeguards
+  components/             # BootScreen, Nav, Hero, cards, showcases, sections, Footer
+  pages/index.astro       # portfolio and catalog landing page
+  pages/mods/[slug].astro # crawlable details and compatibility page per mod
+  pages/catalog.json.ts   # machine-readable release and discovery catalog
+  pages/404.astro         # branded GitHub Pages fallback
+  scripts/                # reveal.ts (scroll reveal)
+  styles/                 # tokens.css, global.css
 public/
-  CNAME                 # modrinth.bearaujus.com
-  mods/<slug>/icon.png  # mod icons (used everywhere; no external images)
+  CNAME                   # modrinth.bearaujus.com
+  mods/<slug>/icon.png    # mod icons (used everywhere; no external images)
+scripts/
+  check-runtime.mjs       # fail-fast Node support check
+  verify-built-site.mjs   # generated catalog, metadata, link, and asset checks
 ```
 
 ## Develop
 
-Use Node 22.12+ on the Node 22 line; `.nvmrc`, `package.json`, and CI all enforce
-that tested runtime. Newer Node lines are intentionally excluded because the
-current Astro toolchain can trigger a Windows libuv shutdown assertion after an
-otherwise successful build.
+Use Node 22.12+ on the Node 22 line; `.nvmrc`, `package.json`, npm scripts, and CI
+all enforce that tested runtime. Unsupported runtimes now fail before a dev
+server or production build starts. Newer Node lines are intentionally excluded
+because the current Astro toolchain can trigger a Windows libuv shutdown
+assertion after an otherwise successful build.
 
 ```bash
 npm ci
@@ -57,10 +65,11 @@ npm run preview  # serve the built site
 ## Quality gates
 
 `npm run verify` is the local and CI source of truth. It type-checks Astro,
-builds the production site, validates the generated HTML, and checks internal
-fragment links, local asset references, social-image dimensions, JSON-LD,
-manifest files, canonical metadata, safe external-link attributes, the custom
-404 page, and the no-render-blocking-CSS/boot-screen first-paint contract.
+builds the production site, validates the generated HTML, and checks all four
+mod landing pages, the machine-readable catalog, internal links, local asset
+references, social-image dimensions, JSON-LD, manifest files, canonical
+metadata, safe external-link attributes, the custom 404 page, and the
+no-render-blocking-CSS/boot-screen first-paint contract.
 
 The deploy workflow runs on pull requests as a build-only check. Pushes to
 `main` and manual dispatches run the same checks before the GitHub Pages deploy.
@@ -70,11 +79,17 @@ update pull requests.
 ## Release catalog refresh
 
 `src/data/mods.ts` mirrors the public release registry in the Minecraft addons
-repository. For every mod release, update the exact Modrinth version number,
-Minecraft compatibility line, runtime dependency minimums, user-facing copy,
-and offline fallback metrics. Keep the four icons aligned with each addon's
-`release/icon.png`, update `public/og.png` when its footer changes, then run
-`npm run verify` before deployment.
+repository and drives every HTML page plus `/catalog.json`. For every mod
+release, update the exact Modrinth project and version IDs, release number,
+Minecraft compatibility line, runtime dependency minimums, user-facing summary,
+categories, discovery queries, and offline fallback metrics. Keep the four icons
+aligned with each addon's `release/icon.png`, update `public/og.png` only when
+its visible catalog message changes, then run `npm run verify` before deployment.
+
+The catalog intentionally links each mod's exact current release as well as its
+stable Modrinth project page. This keeps user-facing pages useful immediately
+after a release while giving launchers and search engines stable project URLs to
+index.
 
 ## Deploy (GitHub Pages + custom domain)
 

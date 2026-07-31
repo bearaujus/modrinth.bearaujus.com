@@ -1,7 +1,7 @@
 {
   "name": "bearaujus — Minecraft Fabric Mods",
   "short_name": "bearaujus mods",
-  "description": "Server-first Minecraft: Java Edition mods for Fabric by bearaujus.",
+  "description": "Server-first Minecraft 26.2.x Fabric mods for dimension changes, death recovery, and multiplayer sleep.",
   "id": "/",
   "start_url": "/",
   "scope": "/",

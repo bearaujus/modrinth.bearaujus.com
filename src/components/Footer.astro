@@ -1,5 +1,5 @@
 ---
-import { MODRINTH_USER } from '../data/mods';
+import { MODRINTH_USER, SUPPORT_URL } from '../data/mods';
 const year = new Date().getFullYear();
 ---
 
@@ -28,6 +28,12 @@ const year = new Date().getFullYear();
         rel="noopener noreferrer"
         aria-label="GitHub profile (opens in a new tab)"
       >GitHub</a>
+      <a
+        href={SUPPORT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Public support and issue tracker (opens in a new tab)"
+      >Support</a>
       <a href="mailto:modrinth@bearaujus.com">Email</a>
     </nav>
 

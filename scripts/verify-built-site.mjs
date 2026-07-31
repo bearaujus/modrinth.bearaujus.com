@@ -61,6 +61,78 @@ const htmlDocuments = new Map(
   ),
 );
 
+let catalog = null;
+try {
+  catalog = JSON.parse(await readFile(path.join(DIST, 'catalog.json'), 'utf8'));
+} catch (error) {
+  errors.push(
+    `catalog.json is missing or invalid (${error instanceof Error ? error.message : String(error)})`,
+  );
+}
+
+const catalogMods = Array.isArray(catalog?.mods) ? catalog.mods : [];
+const publicModEntries = await readdir(path.join(ROOT, 'public', 'mods'), {
+  withFileTypes: true,
+});
+const publicModSlugs = publicModEntries
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+
+check(catalog?.schemaVersion === 1, 'catalog.json has an unsupported schema version');
+check(/^\d{4}-\d{2}-\d{2}$/.test(catalog?.reviewedAt ?? ''), 'catalog.json reviewedAt is invalid');
+check(catalog?.website === SITE, 'catalog.json website does not match production');
+check(
+  catalog?.support === 'https://github.com/bearaujus-dungeon/minecraft-addons/issues',
+  'catalog.json support URL is missing or stale',
+);
+check(catalog?.compatibility?.minecraft === '26.2', 'catalog.json Minecraft version is stale');
+check(catalog?.compatibility?.series === '26.2.x', 'catalog.json Minecraft series is stale');
+check(catalog?.compatibility?.range === '>=26.2 <26.3.0', 'catalog.json Minecraft range is stale');
+check(catalog?.compatibility?.loader === 'Fabric', 'catalog.json loader is stale');
+check(catalogMods.length === publicModSlugs.length, 'catalog mod count does not match public icon folders');
+
+const catalogSlugs = catalogMods.map((mod) => mod.slug).sort();
+check(
+  JSON.stringify(catalogSlugs) === JSON.stringify(publicModSlugs),
+  'catalog slugs do not match public icon folders',
+);
+
+const projectIds = new Set();
+const versionIds = new Set();
+for (const mod of catalogMods) {
+  const label = typeof mod?.slug === 'string' ? mod.slug : '<invalid mod>';
+  check(typeof mod?.name === 'string' && mod.name.length >= 3, `${label}: catalog name is invalid`);
+  check(typeof mod?.summary === 'string' && mod.summary.length >= 40, `${label}: catalog summary is too short`);
+  check(/^\d+\.\d+\.\d+\+26\.2$/.test(mod?.version ?? ''), `${label}: catalog version is invalid`);
+  check(/^[A-Za-z0-9]{8}$/.test(mod?.projectId ?? ''), `${label}: project id is invalid`);
+  check(/^[A-Za-z0-9]{8}$/.test(mod?.versionId ?? ''), `${label}: version id is invalid`);
+  check(!projectIds.has(mod?.projectId), `${label}: duplicate project id`);
+  check(!versionIds.has(mod?.versionId), `${label}: duplicate version id`);
+  projectIds.add(mod?.projectId);
+  versionIds.add(mod?.versionId);
+  check(mod?.page === `${SITE}/mods/${label}/`, `${label}: canonical page URL is invalid`);
+  check(mod?.project === `https://modrinth.com/mod/${label}`, `${label}: project URL is invalid`);
+  check(
+    mod?.release === `${mod?.project}/version/${mod?.versionId}`,
+    `${label}: exact release URL is invalid`,
+  );
+  check(Array.isArray(mod?.categories) && mod.categories.length > 0, `${label}: categories are missing`);
+  check(
+    Array.isArray(mod?.discoveryQueries) && mod.discoveryQueries.length > 0,
+    `${label}: discovery queries are missing`,
+  );
+  check(mod?.environment?.client === 'optional', `${label}: client environment is stale`);
+  check(mod?.environment?.server === 'required', `${label}: server environment is stale`);
+  check(files.has(`mods/${label}/icon.png`), `${label}: public icon is missing`);
+  check(files.has(`mods/${label}/index.html`), `${label}: generated landing page is missing`);
+}
+
+check(
+  htmlFiles.length === catalogMods.length + 2,
+  `expected ${catalogMods.length + 2} HTML pages for the catalog, home, and 404`,
+);
+
 for (const [relative, html] of htmlDocuments) {
   const idValues = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   const ids = new Set(idValues);
@@ -85,6 +157,15 @@ for (const [relative, html] of htmlDocuments) {
   check(
     links.some((attrs) => attrs.rel === 'preload' && attrs.as === 'font' && attrs.type === 'font/woff2'),
     `${relative}: critical body font is not preloaded`,
+  );
+  check(
+    links.some(
+      (attrs) =>
+        attrs.rel === 'alternate' &&
+        attrs.type === 'application/json' &&
+        attrs.href === '/catalog.json',
+    ),
+    `${relative}: machine-readable catalog discovery link is missing`,
   );
   check(html.includes('data-boot-screen'), `${relative}: progressive boot screen is missing`);
   check(html.includes('dataset.boot'), `${relative}: fail-safe boot initializer is missing`);
@@ -135,7 +216,7 @@ for (const [relative, html] of htmlDocuments) {
   check(canonical?.startsWith(`${SITE}/`) === true, `${relative}: canonical URL is missing or off-site`);
 
   const jsonLdMatch = html.match(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
-  if (relative === 'index.html') check(Boolean(jsonLdMatch), `${relative}: JSON-LD is missing`);
+  if (relative !== '404.html') check(Boolean(jsonLdMatch), `${relative}: JSON-LD is missing`);
   if (jsonLdMatch) {
     try {
       JSON.parse(jsonLdMatch[1]);
@@ -152,6 +233,7 @@ for (const required of [
   'icon-192.png',
   'icon-512.png',
   'apple-touch-icon.png',
+  'catalog.json',
   'og.png',
   'robots.txt',
   'site.webmanifest',
@@ -161,6 +243,23 @@ for (const required of [
 }
 
 const indexHtml = htmlDocuments.get('index.html') ?? '';
+for (const mod of catalogMods) {
+  const pageFile = `mods/${mod.slug}/index.html`;
+  const pageHtml = htmlDocuments.get(pageFile) ?? '';
+  const pageLinks = [...pageHtml.matchAll(/<link\b[^>]*>/g)].map((match) => attributes(match[0]));
+  check(indexHtml.includes(`href="/mods/${mod.slug}/"`), `index.html: missing internal link to ${mod.slug}`);
+  check(pageHtml.includes(mod.summary), `${pageFile}: current summary is missing`);
+  check(pageHtml.includes(mod.version), `${pageFile}: current release number is missing`);
+  check(pageHtml.includes(`href="${mod.project}"`), `${pageFile}: Modrinth project link is missing`);
+  check(pageHtml.includes(`href="${mod.release}"`), `${pageFile}: exact release link is missing`);
+  check(pageHtml.includes(`src="/mods/${mod.slug}/icon.png"`), `${pageFile}: canonical icon is missing`);
+  check(pageHtml.includes(`href="${catalog.support}"`), `${pageFile}: support link is missing`);
+  check(
+    pageLinks.some((attrs) => attrs.rel === 'canonical' && attrs.href === mod.page),
+    `${pageFile}: canonical mod URL is missing or incorrect`,
+  );
+}
+
 const ogBytes = await readFile(path.join(DIST, 'og.png'));
 const og = pngDimensions(ogBytes);
 check(metaContent(indexHtml, 'property', 'og:image:width') === String(og.width), 'og:image:width does not match og.png');
@@ -176,6 +275,11 @@ check(robots.includes(`${SITE}/sitemap-index.xml`), 'robots.txt does not referen
 const sitemapFiles = [...files].filter((file) => /^sitemap.*\.xml$/.test(file));
 const sitemap = (await Promise.all(sitemapFiles.map((file) => readFile(path.join(DIST, file), 'utf8')))).join('\n');
 check(!sitemap.includes(`${SITE}/404`), 'sitemap must not include the 404 page');
+check(!sitemap.includes(`${SITE}/catalog.json`), 'sitemap must not list the machine-readable catalog as a page');
+check(sitemap.includes(`<loc>${SITE}/</loc>`), 'sitemap is missing the homepage');
+for (const mod of catalogMods) {
+  check(sitemap.includes(`<loc>${mod.page}</loc>`), `sitemap is missing ${mod.slug}`);
+}
 
 const manifest = JSON.parse(await readFile(path.join(DIST, 'site.webmanifest'), 'utf8'));
 check(manifest.id === '/' && manifest.start_url === '/' && manifest.scope === '/', 'web manifest navigation scope is incomplete');

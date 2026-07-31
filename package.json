@@ -8,15 +8,17 @@
     "node": ">=22.12.0 <23"
   },
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
+    "check:runtime": "node scripts/check-runtime.mjs",
+    "dev": "npm run check:runtime && astro dev",
+    "start": "npm run dev",
+    "build": "npm run check:runtime && astro build",
     "check": "astro check",
     "validate:html": "html-validate \"dist/**/*.html\"",
     "validate:site": "node scripts/verify-built-site.mjs",
+    "preverify": "npm run check:runtime",
     "verify": "npm run check && npm run build && npm run validate:html && npm run validate:site",
     "test": "npm run verify",
-    "preview": "astro preview",
+    "preview": "npm run check:runtime && astro preview",
     "astro": "astro"
   },
   "dependencies": {

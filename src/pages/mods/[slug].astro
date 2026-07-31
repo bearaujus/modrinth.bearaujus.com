@@ -1,0 +1,430 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import type { Mod } from '../../data/mods';
+import {
+  FABRIC_API_MIN_VERSION,
+  LOADER,
+  LOADER_MIN_VERSION,
+  MC_RANGE,
+  MC_SERIES,
+  MODS,
+  SITE_URL,
+  SUPPORT_URL,
+  localModUrl,
+  modrinthProjectUrl,
+  modrinthVersionUrl,
+} from '../../data/mods';
+import { getStats } from '../../lib/modrinth';
+import { personSchema, softwareSchema } from '../../lib/structured-data';
+
+export const getStaticPaths = (() =>
+  MODS.map((mod) => ({ params: { slug: mod.slug }, props: { mod } }))) satisfies GetStaticPaths;
+
+interface Props {
+  mod: Mod;
+}
+
+const { mod } = Astro.props;
+const stats = await getStats();
+const stat = stats[mod.modrinthId] ?? mod.fallback;
+const related = MODS.filter((candidate) => candidate.slug !== mod.slug);
+const site = Astro.site?.href.replace(/\/$/, '') ?? SITE_URL;
+const canonical = `${site}${localModUrl(mod)}`;
+const projectHref = modrinthProjectUrl(mod);
+const releaseHref = modrinthVersionUrl(mod);
+const fmt = (value: number) => value.toLocaleString('en-US');
+const categories = [...mod.categories, ...mod.additionalCategories];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    personSchema(site),
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: `${mod.name} — Minecraft ${MC_SERIES} Fabric Mod`,
+      description: mod.summary,
+      inLanguage: 'en',
+      mainEntity: { '@id': `${canonical}#software` },
+      isPartOf: { '@id': `${site}/#website` },
+    },
+    softwareSchema(mod, stat, site),
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Minecraft Fabric mods',
+          item: `${site}/#mods`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: mod.name,
+          item: canonical,
+        },
+      ],
+    },
+  ],
+};
+const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
+---
+
+<Base
+  title={`${mod.name} | Minecraft ${MC_SERIES} Fabric Mod`}
+  description={mod.summary}
+  imageAlt={`${mod.name} — a server-first Minecraft Fabric mod by bearaujus`}
+>
+  <script type="application/ld+json" is:inline slot="head" set:html={jsonLdText} />
+  <Nav />
+
+  <main id="main-content" style={`--accent: var(--${mod.accent})`}>
+    <section class="mod-hero section" id="top">
+      <div class="wrap">
+        <a class="back-link" href="/#mods">← All bearaujus mods</a>
+
+        <div class="mod-hero-grid">
+          <div class="mod-copy" data-reveal>
+            <p class="eyebrow">Minecraft {MC_SERIES} · {LOADER}</p>
+            <h1>{mod.name}</h1>
+            <p class="mod-summary">{mod.summary}</p>
+
+            <div class="mod-categories" role="group" aria-label="Project categories">
+              {categories.map((category) => <span class="chip">#{category}</span>)}
+            </div>
+
+            <div class="mod-actions">
+              <a
+                class="btn btn-primary"
+                href={releaseHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Get ${mod.name} ${mod.releaseVersion} on Modrinth (opens in a new tab)`}
+              >Get {mod.releaseVersion} ↗</a>
+              <a
+                class="btn btn-ghost"
+                href={projectHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${mod.name} project page on Modrinth (opens in a new tab)`}
+              >View project ↗</a>
+            </div>
+
+            <dl class="mod-stats">
+              <div><dt>Downloads</dt><dd>{fmt(stat.downloads)}</dd></div>
+              <div><dt>Followers</dt><dd>{fmt(stat.followers)}</dd></div>
+              <div><dt>Install model</dt><dd>Server-first</dd></div>
+            </dl>
+          </div>
+
+          <div class="mod-media panel" data-reveal style="--reveal-delay:0.08s">
+            <img
+              src={`/mods/${mod.slug}/icon.png`}
+              alt={`${mod.name} mod icon`}
+              width="512"
+              height="512"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section feature-section" id="features">
+      <div class="wrap split-grid">
+        <div data-reveal>
+          <p class="eyebrow">What it adds</p>
+          <h2>Focused utility, visible where players already look.</h2>
+        </div>
+        <ul class="feature-list" data-reveal style="--reveal-delay:0.06s">
+          {mod.bullets.map((bullet) => <li>{bullet}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section compatibility" id="compatibility">
+      <div class="wrap">
+        <p class="eyebrow" data-reveal>Compatibility</p>
+        <h2 data-reveal style="--reveal-delay:0.04s">Clear install requirements.</h2>
+
+        <div class="compat-grid">
+          <div class="compat-card panel" data-reveal>
+            <span class="compat-code">MC</span>
+            <h3>Minecraft Java {MC_SERIES}</h3>
+            <p>Built and tested on 26.2, with the declared range <span class="mono">{MC_RANGE}</span>.</p>
+          </div>
+          <div class="compat-card panel" data-reveal style="--reveal-delay:0.04s">
+            <span class="compat-code">SRV</span>
+            <h3>Server required</h3>
+            <p>Install the mod and Fabric API on the server. Its shared gameplay features work for vanilla clients.</p>
+          </div>
+          <div class="compat-card panel" data-reveal style="--reveal-delay:0.08s">
+            <span class="compat-code">CLI</span>
+            <h3>Client optional</h3>
+            <p>Install client-side only for personal controls, Mod Menu configuration, or client-specific presentation.</p>
+          </div>
+          <div class="compat-card panel" data-reveal style="--reveal-delay:0.12s">
+            <span class="compat-code">API</span>
+            <h3>Relaxed Fabric floors</h3>
+            <p>Fabric Loader <span class="mono">≥{LOADER_MIN_VERSION}</span> and Fabric API <span class="mono">≥{FABRIC_API_MIN_VERSION}</span>.</p>
+          </div>
+        </div>
+
+        <div class="support-row panel" data-reveal>
+          <div>
+            <h3>Need help or found a bug?</h3>
+            <p>Use the shared public issue tracker so reports stay searchable and actionable.</p>
+          </div>
+          <a
+            class="btn btn-ghost"
+            href={SUPPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >Open support ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section related" id="related">
+      <div class="wrap">
+        <p class="eyebrow" data-reveal>More from bearaujus</p>
+        <h2 data-reveal style="--reveal-delay:0.04s">Small mods that work well together.</h2>
+        <div class="related-grid">
+          {related.map((candidate, index) => (
+            <a
+              class="related-card panel"
+              href={localModUrl(candidate)}
+              style={`--card-accent: var(--${candidate.accent}); --reveal-delay:${index * 0.04}s`}
+              data-reveal
+            >
+              <img
+                src={`/mods/${candidate.slug}/icon.png`}
+                alt=""
+                width="52"
+                height="52"
+                loading="lazy"
+                decoding="async"
+              />
+              <span><strong>{candidate.name}</strong><small>{candidate.summary}</small></span>
+              <span aria-hidden="true">→</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  import '../../scripts/reveal.ts';
+</script>
+
+<style>
+  .mod-hero {
+    padding-top: clamp(2.5rem, 1.5rem + 5vw, 6rem);
+  }
+  .back-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: var(--muted);
+    font-family: var(--font-pixel);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    transition: color 0.16s var(--ease);
+  }
+  .back-link:hover {
+    color: var(--accent);
+  }
+  .mod-hero-grid {
+    display: grid;
+    align-items: center;
+    gap: clamp(2rem, 1rem + 5vw, 5rem);
+    margin-top: 1rem;
+  }
+  @media (min-width: 860px) {
+    .mod-hero-grid {
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+  }
+  h1 {
+    max-width: 13ch;
+    margin-top: 1rem;
+    font-size: var(--step-4);
+  }
+  h2 {
+    max-width: 18ch;
+    margin-top: 1rem;
+    font-size: var(--step-3);
+  }
+  .mod-summary {
+    max-width: 54ch;
+    margin-top: 1.4rem;
+    color: var(--muted);
+    font-size: var(--step-1);
+  }
+  .mod-categories,
+  .mod-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .mod-actions {
+    margin-top: 2rem;
+  }
+  .mod-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    margin: 2.2rem 0 0;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line-soft);
+  }
+  .mod-stats dt {
+    color: var(--faint);
+    font-family: var(--font-pixel);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .mod-stats dd {
+    margin: 0.3rem 0 0;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+  }
+  .mod-media {
+    position: relative;
+    padding: clamp(1rem, 0.4rem + 3vw, 2rem);
+    overflow: hidden;
+    border-left: 3px solid var(--accent);
+    background:
+      radial-gradient(70% 70% at 50% 42%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%),
+      var(--panel);
+  }
+  .mod-media img {
+    width: 100%;
+    filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.56));
+  }
+  .feature-section,
+  .related {
+    background: var(--void-2);
+    border-block: 1px solid var(--line-soft);
+  }
+  .split-grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 5vw, 5rem);
+  }
+  @media (min-width: 820px) {
+    .split-grid {
+      grid-template-columns: 0.85fr 1.15fr;
+    }
+  }
+  .feature-list {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .feature-list li {
+    position: relative;
+    padding: 1rem 1rem 1rem 2.4rem;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+  }
+  .feature-list li::before {
+    content: '';
+    position: absolute;
+    top: 1.42rem;
+    left: 1rem;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .compat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .compat-card {
+    padding: 1.35rem;
+    border-top: 2px solid var(--accent);
+  }
+  .compat-code {
+    color: var(--accent);
+    font-family: var(--font-pixel);
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+  }
+  .compat-card h3 {
+    margin-top: 0.75rem;
+    font-size: var(--step-1);
+  }
+  .compat-card p,
+  .support-row p {
+    margin-top: 0.7rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .mono {
+    font-family: var(--font-mono);
+    overflow-wrap: anywhere;
+  }
+  .support-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem 2rem;
+    margin-top: 1rem;
+    padding: 1.35rem;
+  }
+  .support-row h3 {
+    font-size: var(--step-1);
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .related-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 92px;
+    padding: 1rem;
+    border-left: 3px solid var(--card-accent);
+    transition: transform 0.16s var(--ease), background 0.16s var(--ease);
+  }
+  .related-card:hover {
+    transform: translateY(-3px);
+    background: var(--panel-2);
+  }
+  .related-card img {
+    border-radius: 6px;
+  }
+  .related-card strong,
+  .related-card small {
+    display: block;
+  }
+  .related-card strong {
+    font-size: 0.95rem;
+  }
+  .related-card small {
+    margin-top: 0.25rem;
+    color: var(--faint);
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+</style>

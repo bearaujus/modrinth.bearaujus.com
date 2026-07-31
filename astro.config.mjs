@@ -10,8 +10,8 @@ export default defineConfig({
   integrations: [sitemap()],
   build: {
     format: 'directory',
-    // This is a single-page site with a small stylesheet. Inlining it removes
-    // the render-blocking HTML -> CSS request from the critical render path.
+    // This is a small static site. Inlining its page styles removes the
+    // render-blocking HTML -> CSS request from the critical render path.
     inlineStylesheets: 'always',
   },
 });

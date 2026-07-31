@@ -1,6 +1,10 @@
 ---
 import type { Mod } from '../data/mods';
-import { MC_SERIES } from '../data/mods';
+import {
+  MC_SERIES,
+  localModUrl,
+  modrinthProjectUrl,
+} from '../data/mods';
 import type { Stat } from '../lib/modrinth';
 
 interface Props {
@@ -10,30 +14,29 @@ interface Props {
 }
 const { mod, stat, index } = Astro.props;
 const fmt = (n: number) => n.toLocaleString('en-US');
-const href = `https://modrinth.com/mod/${mod.slug}`;
+const detailsHref = localModUrl(mod);
+const projectHref = modrinthProjectUrl(mod);
 ---
 
-<a
+<article
   class="card panel"
-  href={href}
-  target="_blank"
-  rel="noopener noreferrer"
-  aria-label={`View ${mod.name} ${mod.releaseVersion} on Modrinth (opens in a new tab)`}
   style={`--accent: var(--${mod.accent}); --reveal-delay:${index * 0.06}s`}
   data-reveal
 >
   <div class="card-head">
-    <img
-      class="card-icon"
-      src={`/mods/${mod.slug}/icon.png`}
-      alt=""
-      width="56"
-      height="56"
-      loading="lazy"
-      decoding="async"
-    />
+    <a href={detailsHref} aria-label={`Explore ${mod.name}`}>
+      <img
+        class="card-icon"
+        src={`/mods/${mod.slug}/icon.png`}
+        alt=""
+        width="56"
+        height="56"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
     <div class="card-id">
-      <h3 class="card-name">{mod.name}</h3>
+      <h3 class="card-name"><a href={detailsHref}>{mod.name}</a></h3>
       <p class="card-version">{mod.releaseVersion}</p>
       <div class="card-cats">
         {mod.categories.map((c) => <span class="dot-cat">{c}</span>)}
@@ -41,7 +44,7 @@ const href = `https://modrinth.com/mod/${mod.slug}`;
     </div>
   </div>
 
-  <p class="card-tag">{mod.tagline}</p>
+  <p class="card-tag">{mod.summary}</p>
 
   <div class="card-foot">
     <div class="card-metrics">
@@ -57,8 +60,17 @@ const href = `https://modrinth.com/mod/${mod.slug}`;
     <span class="chip">MC <strong>{MC_SERIES}</strong></span>
   </div>
 
-  <span class="card-go" aria-hidden="true">View on Modrinth ↗</span>
-</a>
+  <div class="card-actions">
+    <a class="card-go" href={detailsHref}>Explore details →</a>
+    <a
+      class="card-go card-go--external"
+      href={projectHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`View ${mod.name} on Modrinth (opens in a new tab)`}
+    >Modrinth ↗</a>
+  </div>
+</article>
 
 <style>
   .card {
@@ -76,7 +88,7 @@ const href = `https://modrinth.com/mod/${mod.slug}`;
     transform: translateY(-4px);
     background: var(--panel-2);
   }
-  .card:hover .card-go {
+  .card:hover .card-go:first-child {
     color: var(--accent);
   }
 
@@ -165,10 +177,26 @@ const href = `https://modrinth.com/mod/${mod.slug}`;
   }
 
   .card-go {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-family: var(--font-pixel);
     font-size: 0.62rem;
     letter-spacing: 0.06em;
     color: var(--muted);
     transition: color 0.18s var(--ease);
+  }
+  .card-go:hover {
+    color: var(--accent);
+  }
+  .card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-top: -0.45rem;
+  }
+  .card-go--external {
+    text-align: right;
   }
 </style>

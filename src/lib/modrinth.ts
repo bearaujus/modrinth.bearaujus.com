@@ -1,6 +1,6 @@
 /* ============================================================
    Build-time fetch of live Modrinth stats.
-   Runs once during `astro build` (and on each dev request).
+   Runs once per `astro build` or development process.
    Never throws — if the API is unreachable, callers fall back
    to the static counts in src/data/mods.ts so the build still
    succeeds offline.
@@ -18,6 +18,7 @@ const UA =
 const KNOWN_PROJECT_IDS = new Set(MODS.map((mod) => mod.modrinthId));
 
 export type StatsMap = Record<string, Stat>;
+let statsPromise: Promise<StatsMap> | undefined;
 
 function validMetric(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
@@ -35,7 +36,7 @@ function fallbackMap(): StatsMap {
  * Returns a map of Modrinth project id -> { downloads, followers }.
  * Live values when reachable, otherwise the static fallback.
  */
-export async function getStats(): Promise<StatsMap> {
+async function fetchStats(): Promise<StatsMap> {
   const ids = MODS.map((m) => m.modrinthId);
   const url = `${API}?ids=${encodeURIComponent(JSON.stringify(ids))}`;
   const controller = new AbortController();
@@ -76,6 +77,11 @@ export async function getStats(): Promise<StatsMap> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+export function getStats(): Promise<StatsMap> {
+  statsPromise ??= fetchStats();
+  return statsPromise;
 }
 
 /** Aggregate totals across all mods. */

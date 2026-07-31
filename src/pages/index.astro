@@ -10,20 +10,18 @@ import Footer from '../components/Footer.astro';
 
 import {
   CATALOG_REVIEWED_AT,
-  FABRIC_API_MIN_VERSION,
-  LOADER_MIN_VERSION,
-  MC_RANGE,
-  MODRINTH_USER,
   MODS,
+  SITE_URL,
 } from '../data/mods';
 import { getStats, totals } from '../lib/modrinth';
+import { personSchema, softwareSchema } from '../lib/structured-data';
 
 // Live Modrinth stats, fetched at build time (falls back to static counts).
 const stats = await getStats();
 const t = totals(stats);
 const statFor = (mod: (typeof MODS)[number]) => stats[mod.modrinthId] ?? mod.fallback;
 
-const site = Astro.site?.href.replace(/\/$/, '') ?? 'https://modrinth.bearaujus.com';
+const site = Astro.site?.href.replace(/\/$/, '') ?? SITE_URL;
 
 // Schema.org structured data for rich search results.
 const jsonLd = {
@@ -35,20 +33,12 @@ const jsonLd = {
       url: `${site}/`,
       name: 'bearaujus — Minecraft Fabric Mods',
       description:
-        'Server-first Minecraft: Java Edition mods for Fabric by bearaujus, published on Modrinth.',
+        'Server-first Minecraft 26.2.x Fabric mods for dimension changes, death recovery, and multiplayer sleep, published by bearaujus on Modrinth.',
       inLanguage: 'en',
       dateModified: CATALOG_REVIEWED_AT,
       publisher: { '@id': `${site}/#person` },
     },
-    {
-      '@type': 'Person',
-      '@id': `${site}/#person`,
-      name: 'Haryo Bagas Assyafah',
-      alternateName: 'bearaujus',
-      url: `${site}/`,
-      jobTitle: 'Software Engineer',
-      sameAs: [MODRINTH_USER, 'https://github.com/bearaujus'],
-    },
+    personSchema(site),
     {
       '@type': 'ItemList',
       name: 'Minecraft Fabric mods by bearaujus',
@@ -57,25 +47,7 @@ const jsonLd = {
       itemListElement: MODS.map((mod, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        item: {
-          '@type': 'SoftwareApplication',
-          name: mod.name,
-          description: mod.tagline,
-          url: `https://modrinth.com/mod/${mod.slug}`,
-          image: `${site}/mods/${mod.slug}/icon.png`,
-          applicationCategory: 'GameApplication',
-          softwareVersion: mod.releaseVersion,
-          operatingSystem: 'Any platform supporting Minecraft: Java Edition',
-          softwareRequirements: `${MC_RANGE}; Fabric Loader >=${LOADER_MIN_VERSION}; Fabric API >=${FABRIC_API_MIN_VERSION}`,
-          author: { '@id': `${site}/#person` },
-          isAccessibleForFree: true,
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-          interactionStatistic: {
-            '@type': 'InteractionCounter',
-            interactionType: 'https://schema.org/DownloadAction',
-            userInteractionCount: statFor(mod).downloads,
-          },
-        },
+        item: softwareSchema(mod, statFor(mod), site),
       })),
     },
   ],

@@ -6,6 +6,8 @@ import {
   LOADER,
   LOADER_MIN_VERSION,
   MC_SERIES,
+  localModUrl,
+  modrinthVersionUrl,
 } from '../data/mods';
 
 interface Props {
@@ -16,7 +18,8 @@ interface Props {
 const { mod, stat, index } = Astro.props;
 const flip = index % 2 === 1;
 const num = String(index + 1).padStart(2, '0');
-const href = `https://modrinth.com/mod/${mod.slug}`;
+const detailsHref = localModUrl(mod);
+const releaseHref = modrinthVersionUrl(mod);
 const fmt = (n: number) => n.toLocaleString('en-US');
 ---
 
@@ -31,7 +34,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
       <span class="eyebrow">{mod.categories[0]}</span>
     </div>
     <h3 class="show-name">{mod.name}</h3>
-    <p class="show-tag">{mod.tagline}</p>
+    <p class="show-tag">{mod.summary}</p>
 
     <ul class="show-list">
       {mod.bullets.map((b) => <li>{b}</li>)}
@@ -52,13 +55,14 @@ const fmt = (n: number) => n.toLocaleString('en-US');
     <div class="show-foot">
       <a
         class="btn btn-primary"
-        href={href}
+        href={releaseHref}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Get ${mod.name} ${mod.releaseVersion} on Modrinth (opens in a new tab)`}
       >
-        Get on Modrinth ↗
+        Get current release ↗
       </a>
+      <a class="btn btn-ghost" href={detailsHref}>Details &amp; compatibility</a>
       <span class="show-metric">
         <strong>{fmt(stat.downloads)}</strong> downloads ·
         <strong>{fmt(stat.followers)}</strong> followers
