@@ -8,7 +8,6 @@ import {
   FABRIC_API_MIN_VERSION,
   LOADER,
   LOADER_MIN_VERSION,
-  MC_RANGE,
   MC_SERIES,
   MODS,
   SITE_URL,
@@ -17,7 +16,7 @@ import {
   modrinthProjectUrl,
   modrinthVersionUrl,
 } from '../../data/mods';
-import { getStats } from '../../lib/modrinth';
+import { fallbackStats } from '../../lib/modrinth';
 import { personSchema, softwareSchema } from '../../lib/structured-data';
 
 export const getStaticPaths = (() =>
@@ -28,7 +27,7 @@ interface Props {
 }
 
 const { mod } = Astro.props;
-const stats = await getStats();
+const stats = fallbackStats();
 const stat = stats[mod.modrinthId] ?? mod.fallback;
 const related = MODS.filter((candidate) => candidate.slug !== mod.slug);
 const site = Astro.site?.href.replace(/\/$/, '') ?? SITE_URL;
@@ -83,19 +82,40 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
   <script type="application/ld+json" is:inline slot="head" set:html={jsonLdText} />
   <Nav />
 
-  <main id="main-content" style={`--accent: var(--${mod.accent})`}>
+  <main
+    id="main-content"
+    style={`--accent: var(--${mod.accent})`}
+    data-modrinth-page-project={mod.modrinthId}
+  >
     <section class="mod-hero section" id="top">
       <div class="wrap">
         <a class="back-link" href="/#mods">← All bearaujus mods</a>
 
-        <div class="mod-hero-grid">
+        <div
+          class="mod-hero-grid"
+          data-modrinth-project={mod.modrinthId}
+          data-fallback-downloads={mod.fallback.downloads}
+          data-fallback-followers={mod.fallback.followers}
+          data-fallback-version={mod.modrinthVersionId}
+        >
           <div class="mod-copy" data-reveal>
-            <p class="eyebrow">Minecraft {MC_SERIES} · {LOADER}</p>
-            <h1>{mod.name}</h1>
-            <p class="mod-summary">{mod.summary}</p>
+            <p class="eyebrow">
+              Minecraft <span data-modrinth-field="game-versions">{MC_SERIES}</span>
+              · <span data-modrinth-field="loaders">{LOADER}</span>
+            </p>
+            <h1><span data-modrinth-field="title">{mod.name}</span></h1>
+            <p class="mod-summary" data-modrinth-field="description">{mod.summary}</p>
 
-            <div class="mod-categories" role="group" aria-label="Project categories">
-              {categories.map((category) => <span class="chip">#{category}</span>)}
+            <div
+              class="mod-categories"
+              role="group"
+              aria-label="Project categories"
+              data-modrinth-categories
+              data-category-variant="chip"
+            >
+              {categories.map((category) => (
+                <span class="chip" data-modrinth-category-item>#{category}</span>
+              ))}
             </div>
 
             <div class="mod-actions">
@@ -104,22 +124,26 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
                 href={releaseHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Get ${mod.name} ${mod.releaseVersion} on Modrinth (opens in a new tab)`}
-              >Get {mod.releaseVersion} ↗</a>
+                data-modrinth-href="release"
+              >Get <span data-modrinth-field="version">{mod.releaseVersion}</span>
+                <span aria-hidden="true">↗</span><span class="sr-only"> on Modrinth (opens in a new tab)</span></a>
               <a
                 class="btn btn-ghost"
                 href={projectHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${mod.name} project page on Modrinth (opens in a new tab)`}
-              >View project ↗</a>
+                data-modrinth-href="project"
+              >View project <span aria-hidden="true">↗</span><span class="sr-only"> on Modrinth (opens in a new tab)</span></a>
             </div>
 
             <dl class="mod-stats">
-              <div><dt>Downloads</dt><dd>{fmt(stat.downloads)}</dd></div>
-              <div><dt>Followers</dt><dd>{fmt(stat.followers)}</dd></div>
-              <div><dt>Install model</dt><dd>Server-first</dd></div>
+              <div><dt>Downloads</dt><dd data-modrinth-field="downloads">{fmt(stat.downloads)}</dd></div>
+              <div><dt>Followers</dt><dd data-modrinth-field="followers">{fmt(stat.followers)}</dd></div>
+              <div><dt>Install model</dt><dd data-modrinth-field="environment-short">Server-first</dd></div>
             </dl>
+            <p class="live-status" data-modrinth-status aria-live="polite">
+              Showing the published snapshot.
+            </p>
           </div>
 
           <div class="mod-media panel" data-reveal style="--reveal-delay:0.08s">
@@ -129,6 +153,9 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
               width="512"
               height="512"
               decoding="async"
+              data-modrinth-icon
+              data-modrinth-icon-descriptive
+              data-fallback-src={`/mods/${mod.slug}/icon.png`}
             />
           </div>
         </div>
@@ -152,26 +179,34 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
         <p class="eyebrow" data-reveal>Compatibility</p>
         <h2 data-reveal style="--reveal-delay:0.04s">Clear install requirements.</h2>
 
-        <div class="compat-grid">
+        <div
+          class="compat-grid"
+          data-modrinth-project={mod.modrinthId}
+          data-fallback-version={mod.modrinthVersionId}
+        >
           <div class="compat-card panel" data-reveal>
-            <span class="compat-code">MC</span>
-            <h3>Minecraft Java {MC_SERIES}</h3>
-            <p>Built and tested on 26.2, with the declared range <span class="mono">{MC_RANGE}</span>.</p>
+            <span class="compat-code">REL</span>
+            <h3 data-modrinth-field="version">{mod.releaseVersion}</h3>
+            <p>The newest reviewed stable release on Modrinth.</p>
           </div>
           <div class="compat-card panel" data-reveal style="--reveal-delay:0.04s">
-            <span class="compat-code">SRV</span>
-            <h3>Server required</h3>
-            <p>Install the mod and Fabric API on the server. Its shared gameplay features work for vanilla clients.</p>
+            <span class="compat-code">MC</span>
+            <h3>Minecraft Java <span data-modrinth-field="game-versions">{MC_SERIES}</span></h3>
+            <p>Exact game versions declared by the current release.</p>
           </div>
           <div class="compat-card panel" data-reveal style="--reveal-delay:0.08s">
-            <span class="compat-code">CLI</span>
-            <h3>Client optional</h3>
-            <p>Install client-side only for personal controls, Mod Menu configuration, or client-specific presentation.</p>
+            <span class="compat-code">LOAD</span>
+            <h3 data-modrinth-field="loaders">{LOADER}</h3>
+            <p data-modrinth-field="dependency-note">
+              Loader ≥{LOADER_MIN_VERSION} · Fabric API ≥{FABRIC_API_MIN_VERSION}.
+            </p>
           </div>
           <div class="compat-card panel" data-reveal style="--reveal-delay:0.12s">
-            <span class="compat-code">API</span>
-            <h3>Relaxed Fabric floors</h3>
-            <p>Fabric Loader <span class="mono">≥{LOADER_MIN_VERSION}</span> and Fabric API <span class="mono">≥{FABRIC_API_MIN_VERSION}</span>.</p>
+            <span class="compat-code">ENV</span>
+            <h3 data-modrinth-field="environment-title">Server required · client optional</h3>
+            <p data-modrinth-field="environment-description">
+              Install it on the server. Optional client installs can add personal controls or presentation.
+            </p>
           </div>
         </div>
 
@@ -200,6 +235,10 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
               class="related-card panel"
               href={localModUrl(candidate)}
               style={`--card-accent: var(--${candidate.accent}); --reveal-delay:${index * 0.04}s`}
+              data-modrinth-project={candidate.modrinthId}
+              data-fallback-downloads={candidate.fallback.downloads}
+              data-fallback-followers={candidate.fallback.followers}
+              data-fallback-version={candidate.modrinthVersionId}
               data-reveal
             >
               <img
@@ -209,8 +248,13 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
                 height="52"
                 loading="lazy"
                 decoding="async"
+                data-modrinth-icon
+                data-fallback-src={`/mods/${candidate.slug}/icon.png`}
               />
-              <span><strong>{candidate.name}</strong><small>{candidate.summary}</small></span>
+              <span>
+                <strong data-modrinth-field="title">{candidate.name}</strong>
+                <small data-modrinth-field="description">{candidate.summary}</small>
+              </span>
               <span aria-hidden="true">→</span>
             </a>
           ))}
@@ -224,6 +268,7 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
 
 <script>
   import '../../scripts/reveal.ts';
+  import '../../scripts/modrinth-runtime.ts';
 </script>
 
 <style>
@@ -248,6 +293,7 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
     align-items: center;
     gap: clamp(2rem, 1rem + 5vw, 5rem);
     margin-top: 1rem;
+    min-width: 0;
   }
   @media (min-width: 860px) {
     .mod-hero-grid {
@@ -258,6 +304,7 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
     max-width: 13ch;
     margin-top: 1rem;
     font-size: var(--step-4);
+    overflow-wrap: anywhere;
   }
   h2 {
     max-width: 18ch;
@@ -300,9 +347,26 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
     color: var(--ink);
     font-family: var(--font-mono);
     font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .live-status {
+    margin-top: 0.8rem;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+  .live-status[data-state='live'] {
+    color: var(--ovr);
   }
   .mod-media {
     position: relative;
+    display: grid;
+    place-items: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1;
     padding: clamp(1rem, 0.4rem + 3vw, 2rem);
     overflow: hidden;
     border-left: 3px solid var(--accent);
@@ -312,6 +376,9 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
   }
   .mod-media img {
     width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
     filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.56));
   }
   .feature-section,
@@ -368,6 +435,7 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
   .compat-card h3 {
     margin-top: 0.75rem;
     font-size: var(--step-1);
+    overflow-wrap: anywhere;
   }
   .compat-card p,
   .support-row p {
@@ -412,6 +480,10 @@ const jsonLdText = JSON.stringify(jsonLd).replaceAll('<', '\\u003c');
     background: var(--panel-2);
   }
   .related-card img {
+    width: 52px;
+    height: 52px;
+    aspect-ratio: 1;
+    object-fit: contain;
     border-radius: 6px;
   }
   .related-card strong,

@@ -18,12 +18,17 @@
   (() => {
     const root = document.documentElement;
     const screen = document.querySelector('[data-boot-screen]');
+    if (root.dataset.boot !== 'pending') {
+      screen?.remove();
+      return;
+    }
     if (!(screen instanceof HTMLElement)) {
       delete root.dataset.boot;
       return;
     }
 
-    const minimumVisibleMs = 320;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const minimumVisibleMs = reducedMotion ? 0 : 320;
     let exitStarted = false;
     let revealTimer;
     const timeout = window.setTimeout(beginExit, 1200);
@@ -48,6 +53,11 @@
 
       requestAnimationFrame(() => {
         root.dataset.boot = 'complete';
+        try {
+          sessionStorage.setItem('bearaujus:boot-seen:v1', '1');
+        } catch {
+          // The dark root canvas still protects later navigations.
+        }
 
         // Keep the node just long enough for the exit transition, then remove
         // all boot-only state so back/forward-cache restores are immediate.

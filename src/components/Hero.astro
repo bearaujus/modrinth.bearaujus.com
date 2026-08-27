@@ -10,7 +10,10 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 
 <section class="hero section" id="top">
   <div class="wrap hero-inner">
-    <p class="eyebrow">Fabric mods · Minecraft Java {MC_SERIES}</p>
+    <p class="eyebrow">
+      Fabric mods · Minecraft Java
+      <span data-modrinth-current-game-versions>{MC_SERIES}</span>
+    </p>
 
     <h1 class="hero-title">
       Small server mods that{' '}<span class="hl">say the right thing</span>{' '}at the right moment.
@@ -35,11 +38,11 @@ const fmt = (n: number) => n.toLocaleString('en-US');
       </div>
       <div>
         <dt>Downloads</dt>
-        <dd>{fmt(totalDownloads)}</dd>
+        <dd data-modrinth-total-downloads>{fmt(totalDownloads)}</dd>
       </div>
       <div>
         <dt>Game version</dt>
-        <dd class="mono">{MC_SERIES}</dd>
+        <dd class="mono" data-modrinth-current-game-versions>{MC_SERIES}</dd>
       </div>
     </dl>
   </div>
@@ -93,6 +96,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
     font-size: var(--step-2);
     font-weight: 700;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
   .hero-stats .mono {
     font-family: var(--font-mono);

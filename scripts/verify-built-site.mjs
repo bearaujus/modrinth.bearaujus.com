@@ -53,6 +53,7 @@ function pngDimensions(bytes) {
 const absoluteFiles = await collectFiles(DIST);
 const files = new Set(absoluteFiles.map(relativeFile));
 const htmlFiles = absoluteFiles.filter((file) => file.endsWith('.html'));
+const jsFiles = absoluteFiles.filter((file) => file.endsWith('.js'));
 check(htmlFiles.length > 0, 'dist contains no HTML files');
 
 const htmlDocuments = new Map(
@@ -137,7 +138,9 @@ for (const [relative, html] of htmlDocuments) {
   const idValues = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   const ids = new Set(idValues);
   const htmlTag = html.match(/<html\b[^>]*>/)?.[0] ?? '';
+  const bodyTag = html.match(/<body\b[^>]*>/)?.[0] ?? '';
   const rootStyle = attributes(htmlTag).style ?? '';
+  const bodyStyle = attributes(bodyTag).style ?? '';
   const links = [...html.matchAll(/<link\b[^>]*>/g)].map((match) => attributes(match[0]));
 
   check(/<html\b[^>]*\blang="en"/.test(html), `${relative}: missing English document language`);
@@ -148,6 +151,10 @@ for (const [relative, html] of htmlDocuments) {
   check(
     /(?:^|;)\s*color-scheme\s*:\s*dark\s*(?:;|$)/i.test(rootStyle),
     `${relative}: missing the inline dark root color scheme`,
+  );
+  check(
+    /(?:^|;)\s*background-color\s*:\s*#0b0d10\s*(?:;|$)/i.test(bodyStyle),
+    `${relative}: missing the inline dark body canvas color`,
   );
   check(metaContent(html, 'name', 'color-scheme') === 'dark', `${relative}: missing dark color-scheme metadata`);
   check(
@@ -169,6 +176,7 @@ for (const [relative, html] of htmlDocuments) {
   );
   check(html.includes('data-boot-screen'), `${relative}: progressive boot screen is missing`);
   check(html.includes('dataset.boot'), `${relative}: fail-safe boot initializer is missing`);
+  check(!html.includes('at build time'), `${relative}: contains stale build-time data copy`);
   check((html.match(/<h1\b/g) ?? []).length === 1, `${relative}: expected exactly one h1`);
   check(idValues.length === ids.size, `${relative}: duplicate element id found`);
   check(ids.has('main-content'), `${relative}: skip-link target #main-content is missing`);
@@ -243,6 +251,12 @@ for (const required of [
 }
 
 const indexHtml = htmlDocuments.get('index.html') ?? '';
+check(indexHtml.includes('data-modrinth-total-downloads'), 'index.html: live total-download hook is missing');
+check(indexHtml.includes('data-modrinth-status'), 'index.html: live data status hook is missing');
+check(
+  (indexHtml.match(/data-modrinth-project=/g) ?? []).length === catalogMods.length,
+  'index.html: expected one runtime project card per catalog mod',
+);
 for (const mod of catalogMods) {
   const pageFile = `mods/${mod.slug}/index.html`;
   const pageHtml = htmlDocuments.get(pageFile) ?? '';
@@ -253,12 +267,27 @@ for (const mod of catalogMods) {
   check(pageHtml.includes(`href="${mod.project}"`), `${pageFile}: Modrinth project link is missing`);
   check(pageHtml.includes(`href="${mod.release}"`), `${pageFile}: exact release link is missing`);
   check(pageHtml.includes(`src="/mods/${mod.slug}/icon.png"`), `${pageFile}: canonical icon is missing`);
+  check(pageHtml.includes('data-modrinth-icon-descriptive'), `${pageFile}: live hero icon hook is missing`);
+  check(pageHtml.includes('data-modrinth-href="release"'), `${pageFile}: live release-link hook is missing`);
+  check(pageHtml.includes('data-modrinth-status'), `${pageFile}: live data status hook is missing`);
   check(pageHtml.includes(`href="${catalog.support}"`), `${pageFile}: support link is missing`);
   check(
     pageLinks.some((attrs) => attrs.rel === 'canonical' && attrs.href === mod.page),
     `${pageFile}: canonical mod URL is missing or incorrect`,
   );
 }
+
+const clientJavaScript = (
+  await Promise.all(jsFiles.map((file) => readFile(file, 'utf8')))
+).join('\n');
+check(
+  clientJavaScript.includes('api.modrinth.com/v2'),
+  'generated client JavaScript is missing browser-time Modrinth hydration',
+);
+check(
+  clientJavaScript.includes('modrinth-catalog:v1'),
+  'generated client JavaScript is missing the bounded session cache',
+);
 
 const ogBytes = await readFile(path.join(DIST, 'og.png'));
 const og = pngDimensions(ogBytes);

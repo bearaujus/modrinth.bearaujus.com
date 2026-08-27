@@ -16,59 +16,86 @@ const { mod, stat, index } = Astro.props;
 const fmt = (n: number) => n.toLocaleString('en-US');
 const detailsHref = localModUrl(mod);
 const projectHref = modrinthProjectUrl(mod);
+const categories = [...mod.categories, ...mod.additionalCategories];
 ---
 
 <article
   class="card panel"
   style={`--accent: var(--${mod.accent}); --reveal-delay:${index * 0.06}s`}
+  data-modrinth-project={mod.modrinthId}
+  data-fallback-downloads={mod.fallback.downloads}
+  data-fallback-followers={mod.fallback.followers}
+  data-fallback-version={mod.modrinthVersionId}
   data-reveal
 >
   <div class="card-head">
-    <a href={detailsHref} aria-label={`Explore ${mod.name}`}>
+    <a class="card-icon-link" href={detailsHref} aria-label={`Explore ${mod.name}`}>
       <img
         class="card-icon"
         src={`/mods/${mod.slug}/icon.png`}
         alt=""
-        width="56"
-        height="56"
+        width="80"
+        height="80"
         loading="lazy"
         decoding="async"
+        data-modrinth-icon
+        data-fallback-src={`/mods/${mod.slug}/icon.png`}
       />
     </a>
     <div class="card-id">
-      <h3 class="card-name"><a href={detailsHref}>{mod.name}</a></h3>
-      <p class="card-version">{mod.releaseVersion}</p>
-      <div class="card-cats">
-        {mod.categories.map((c) => <span class="dot-cat">{c}</span>)}
-      </div>
+      <p class="card-kicker">Current release</p>
+      <p class="card-version" data-modrinth-field="version">{mod.releaseVersion}</p>
+      <h3 class="card-name">
+        <a href={detailsHref}><span data-modrinth-field="title">{mod.name}</span></a>
+      </h3>
     </div>
   </div>
 
-  <p class="card-tag">{mod.summary}</p>
+  <p class="card-tag" data-modrinth-field="description">{mod.summary}</p>
 
-  <div class="card-foot">
-    <div class="card-metrics">
-      <span class="metric" title="Downloads on Modrinth">
-        <span class="metric-num">{fmt(stat.downloads)}</span>
-        <span class="metric-lbl">downloads</span>
-      </span>
-      <span class="metric" title="Followers on Modrinth">
-        <span class="metric-num">{fmt(stat.followers)}</span>
-        <span class="metric-lbl">followers</span>
-      </span>
-    </div>
-    <span class="chip">MC <strong>{MC_SERIES}</strong></span>
+  <div
+    class="card-cats"
+    data-modrinth-categories
+    data-category-variant="dot"
+    role="group"
+    aria-label="Project categories"
+  >
+    {categories.map((category) => (
+      <span class="dot-cat" data-modrinth-category-item>{category}</span>
+    ))}
   </div>
+
+  <dl class="card-specs">
+    <div>
+      <dt>Minecraft</dt>
+      <dd data-modrinth-field="game-versions">{MC_SERIES}</dd>
+    </div>
+    <div>
+      <dt>Install</dt>
+      <dd data-modrinth-field="environment-short">Server-first</dd>
+    </div>
+  </dl>
+
+  <dl class="card-metrics">
+    <div class="metric">
+      <dt class="metric-lbl">Downloads</dt>
+      <dd class="metric-num" data-modrinth-field="downloads">{fmt(stat.downloads)}</dd>
+    </div>
+    <div class="metric">
+      <dt class="metric-lbl">Followers</dt>
+      <dd class="metric-num" data-modrinth-field="followers">{fmt(stat.followers)}</dd>
+    </div>
+  </dl>
 
   <div class="card-actions">
-    <a class="card-go" href={detailsHref}>Explore details →</a>
+    <a class="card-go card-go--primary" href={detailsHref}>Explore details →</a>
     <a
       class="card-go card-go--external"
       href={projectHref}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`View ${mod.name} on Modrinth (opens in a new tab)`}
-    >Modrinth ↗</a>
+      data-modrinth-href="project"
+    >Modrinth <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
   </div>
 </article>
 
@@ -77,50 +104,68 @@ const projectHref = modrinthProjectUrl(mod);
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1.3rem;
+    gap: 1.1rem;
+    min-width: 0;
+    height: 100%;
+    padding: clamp(1.2rem, 1rem + 0.8vw, 1.55rem);
+    overflow: hidden;
     border-left: 3px solid var(--accent);
     transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
       background 0.18s var(--ease);
-    height: 100%;
   }
-  .card:hover {
+  .card:hover,
+  .card:focus-within {
     transform: translateY(-4px);
     background: var(--panel-2);
   }
-  .card:hover .card-go:first-child {
+  .card:hover .card-go--primary,
+  .card:focus-within .card-go--primary {
     color: var(--accent);
   }
 
   .card-head {
-    display: flex;
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
     align-items: center;
-    gap: 0.9rem;
+    gap: 1rem;
+  }
+  .card-icon-link {
+    border-radius: 7px;
   }
   .card-id {
     min-width: 0;
   }
   .card-icon {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
+    aspect-ratio: 1;
+    object-fit: contain;
     border-radius: 6px;
     image-rendering: auto;
     background: var(--void);
     border: 1px solid var(--line);
-    flex-shrink: 0;
+  }
+  .card-kicker {
+    color: var(--faint);
+    font-family: var(--font-pixel);
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .card-name {
+    margin-top: 0.45rem;
     font-size: var(--step-1);
+    overflow-wrap: anywhere;
   }
   .card-version {
-    margin-top: 0.15rem;
+    margin-top: 0.2rem;
     color: var(--accent);
     font-family: var(--font-mono);
     font-size: 0.7rem;
     font-weight: 600;
+    overflow-wrap: anywhere;
   }
   .card-cats {
-    margin-top: 0.35rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 0.7rem;
@@ -142,38 +187,45 @@ const projectHref = modrinthProjectUrl(mod);
     color: var(--muted);
     font-size: var(--step--1);
     line-height: 1.5;
-    flex: 1;
   }
 
-  .card-foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    padding-top: 0.9rem;
+  .card-specs,
+  .card-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem 1.2rem;
+    margin: 0;
+    padding-top: 1rem;
     border-top: 1px solid var(--line-soft);
   }
-  .card-metrics {
-    display: flex;
-    gap: 1.1rem;
+  .card-specs dt,
+  .metric-lbl {
+    color: var(--faint);
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .card-specs dd {
+    margin: 0.3rem 0 0;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    overflow-wrap: anywhere;
   }
   .metric {
     display: flex;
-    flex-direction: column;
-    line-height: 1.1;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.2rem;
   }
   .metric-num {
+    margin: 0;
     font-family: var(--font-mono);
     font-weight: 600;
     color: var(--ink);
     font-size: 0.95rem;
-  }
-  .metric-lbl {
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--faint);
+    font-variant-numeric: tabular-nums;
   }
 
   .card-go {
@@ -194,9 +246,18 @@ const projectHref = modrinthProjectUrl(mod);
     align-items: center;
     justify-content: space-between;
     gap: 0.8rem;
-    margin-top: -0.45rem;
+    margin-top: auto;
   }
   .card-go--external {
     text-align: right;
+  }
+  @media (max-width: 380px) {
+    .card-head {
+      grid-template-columns: 64px minmax(0, 1fr);
+    }
+    .card-icon {
+      width: 64px;
+      height: 64px;
+    }
   }
 </style>

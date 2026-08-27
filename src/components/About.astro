@@ -1,7 +1,7 @@
 ---
 import { totals } from '../lib/modrinth';
 import type { StatsMap } from '../lib/modrinth';
-import { MODRINTH_USER, MC_SERIES, MC_VERSION, SUPPORT_URL } from '../data/mods';
+import { MODRINTH_USER, MC_SERIES, SUPPORT_URL } from '../data/mods';
 
 interface Props {
   stats: StatsMap;
@@ -33,9 +33,9 @@ const links = [
       <p class="about-body">
         My focus is quiet utility: mods that drop onto a Fabric server and make
         a group's day-to-day play clearer, without forcing every player to
-        install anything. Each one is built for exact, tested compatibility —
-        currently built and boot-tested on Minecraft Java {MC_VERSION}, with
-        patch-tolerant support across {MC_SERIES}.
+        install anything. Each release is tested against an exact Minecraft
+        and Fabric combination; the current releases target Minecraft Java
+        {' '}<span class="mono" data-modrinth-current-game-versions>{MC_SERIES}</span>.
       </p>
 
       <ul class="about-links">
@@ -63,14 +63,16 @@ const links = [
         <span class="stat-lbl">published mods</span>
       </div>
       <div class="stat-row">
-        <span class="stat-num">{fmt(t.downloads)}</span>
+        <span class="stat-num" data-modrinth-total-downloads>{fmt(t.downloads)}</span>
         <span class="stat-lbl">total downloads</span>
       </div>
       <div class="stat-row">
-        <span class="stat-num">{fmt(t.followers)}</span>
+        <span class="stat-num" data-modrinth-total-followers>{fmt(t.followers)}</span>
         <span class="stat-lbl">followers</span>
       </div>
-      <p class="stat-note">Refreshed from Modrinth at build time, with offline fallbacks.</p>
+      <p class="stat-note" data-modrinth-status aria-live="polite">
+        Showing the published snapshot.
+      </p>
     </aside>
   </div>
 </section>
@@ -96,6 +98,11 @@ const links = [
     color: var(--muted);
     font-size: var(--step-1);
     max-width: 56ch;
+  }
+  .about-body .mono {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    white-space: nowrap;
   }
 
   .about-links {
@@ -151,6 +158,7 @@ const links = [
     font-size: var(--step-2);
     line-height: 1;
     color: var(--ovr);
+    font-variant-numeric: tabular-nums;
   }
   .stat-lbl {
     font-size: 0.62rem;
@@ -164,5 +172,8 @@ const links = [
     color: var(--faint);
     border-top: 1px solid var(--line-soft);
     padding-top: 0.9rem;
+  }
+  .stat-note[data-state='live'] {
+    color: var(--ovr);
   }
 </style>

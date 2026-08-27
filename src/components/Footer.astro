@@ -20,20 +20,17 @@ const year = new Date().getFullYear();
         href={MODRINTH_USER}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Modrinth profile (opens in a new tab)"
-      >Modrinth</a>
+      >Modrinth<span class="sr-only"> profile (opens in a new tab)</span></a>
       <a
         href="https://github.com/bearaujus"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="GitHub profile (opens in a new tab)"
-      >GitHub</a>
+      >GitHub<span class="sr-only"> profile (opens in a new tab)</span></a>
       <a
         href={SUPPORT_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Public support and issue tracker (opens in a new tab)"
-      >Support</a>
+      >Support<span class="sr-only"> and issue tracker (opens in a new tab)</span></a>
       <a href="mailto:modrinth@bearaujus.com">Email</a>
     </nav>
 
@@ -73,12 +70,18 @@ const year = new Date().getFullYear();
   }
   .footer-links {
     display: flex;
+    flex-wrap: wrap;
     gap: 1.4rem;
     font-size: 0.85rem;
     color: var(--muted);
   }
   .footer-links a:hover {
     color: var(--ovr);
+  }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .footer-note {
     width: 100%;
@@ -87,5 +90,11 @@ const year = new Date().getFullYear();
     border-top: 1px solid var(--line-soft);
     padding-top: 1.2rem;
     margin-top: 0.4rem;
+  }
+  @media (max-width: 560px) {
+    .footer-links {
+      width: 100%;
+      gap: 0 1.2rem;
+    }
   }
 </style>

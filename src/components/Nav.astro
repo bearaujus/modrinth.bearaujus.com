@@ -18,7 +18,9 @@ import { MODRINTH_USER, SUPPORT_URL } from '../data/mods';
       <a href="/#mods">Mods</a>
       <a href="/#approach">Approach</a>
       <a href="/#about">About</a>
-      <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">Support ↗</a>
+      <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+        Support <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+      </a>
     </nav>
 
     <a
@@ -29,9 +31,39 @@ import { MODRINTH_USER, SUPPORT_URL } from '../data/mods';
       aria-label="bearaujus on Modrinth (opens in a new tab)"
     >
       Modrinth <span aria-hidden="true">↗</span>
+      <span class="sr-only"> (opens in a new tab)</span>
     </a>
+
+    <details class="mobile-menu">
+      <summary class="btn btn-ghost mobile-menu-toggle">Menu</summary>
+      <nav class="mobile-menu-panel" aria-label="Mobile navigation">
+        <a href="/#mods">Mods</a>
+        <a href="/#approach">Approach</a>
+        <a href="/#about">About</a>
+        <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+          Support <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+        </a>
+        <a href={MODRINTH_USER} target="_blank" rel="noopener noreferrer">
+          Modrinth <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      </nav>
+    </details>
   </div>
 </header>
+
+<script>
+  for (const menu of document.querySelectorAll<HTMLDetailsElement>('.mobile-menu')) {
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => menu.removeAttribute('open'));
+    });
+    menu.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        menu.removeAttribute('open');
+        menu.querySelector<HTMLElement>('summary')?.focus();
+      }
+    });
+  }
+</script>
 
 <style>
   .nav {
@@ -89,9 +121,56 @@ import { MODRINTH_USER, SUPPORT_URL } from '../data/mods';
     padding: 0.5rem 0.8rem;
     flex-shrink: 0;
   }
+  .mobile-menu {
+    position: relative;
+    display: block;
+    margin-left: auto;
+  }
+  .mobile-menu summary {
+    list-style: none;
+  }
+  .mobile-menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    padding: 0.5rem 0.8rem;
+  }
+  .mobile-menu-panel {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    right: 0;
+    display: grid;
+    width: min(18rem, calc(100vw - 2.2rem));
+    padding: 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+  }
+  .mobile-menu-panel a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.55rem 0.7rem;
+    color: var(--muted);
+    font-size: 0.86rem;
+  }
+  .mobile-menu-panel a:hover,
+  .mobile-menu-panel a:focus-visible {
+    color: var(--ink);
+    background: var(--panel-2);
+  }
   @media (min-width: 760px) {
     .nav-links {
       display: flex;
+    }
+    .mobile-menu {
+      display: none;
+    }
+  }
+  @media (max-width: 759px) {
+    .nav-cta {
+      display: none;
     }
   }
 </style>

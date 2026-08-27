@@ -13,10 +13,11 @@
     "start": "npm run dev",
     "build": "npm run check:runtime && astro build",
     "check": "astro check",
+    "test:runtime-data": "node --experimental-strip-types --test scripts/modrinth-runtime.test.mjs",
     "validate:html": "html-validate \"dist/**/*.html\"",
     "validate:site": "node scripts/verify-built-site.mjs",
     "preverify": "npm run check:runtime",
-    "verify": "npm run check && npm run build && npm run validate:html && npm run validate:site",
+    "verify": "npm run check && npm run test:runtime-data && npm run build && npm run validate:html && npm run validate:site",
     "test": "npm run verify",
     "preview": "npm run check:runtime && astro preview",
     "astro": "astro"

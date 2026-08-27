@@ -11,35 +11,36 @@ An **in-game HUD** direction: the visual language is borrowed from what the mods
 actually do — write to Minecraft's action bar, chat, and Tab list. Color carries
 meaning: Overworld green, Nether red, End purple, and a dawn gold for the
 wake-up/morning mods. Pixel labels and HUD-style chips reinforce the theme; the
-mod showcases present each mod as a clean icon badge.
+catalog cards present each mod as a compact, readable project panel.
 
 ## Stack
 
-- **Astro 7** — static output, inlined per-page CSS, and near-zero client JS
-  (a fail-safe boot transition plus resilient scroll reveals).
+- **Astro 7** — static output, inlined per-page CSS, and small progressive
+  client scripts for the first-visit transition, scroll reveals, and live data.
 - **Fontsource** — self-hosted Silkscreen (pixel labels), Inter (body),
   JetBrains Mono (data/chips).
-- **Modrinth API** — live download/follower counts fetched at build time, with a
-  static fallback so the build never fails offline (`src/lib/modrinth.ts`).
+- **Modrinth API** — public project metadata, current stable releases, and
+  metrics refreshed in the browser, with reviewed first-render fallbacks so
+  builds and page rendering never depend on the API.
 
 ## Project layout
 
 ```
 src/
   data/mods.ts            # release catalog mirror: versions, compatibility, discovery copy
-  lib/modrinth.ts         # cached build-time live stats (with offline fallbacks)
+  lib/modrinth.ts         # deterministic first-render metric snapshots
   lib/structured-data.ts  # shared Person and SoftwareApplication JSON-LD
   layouts/Base.astro      # head, fonts, meta, first-paint safeguards
-  components/             # BootScreen, Nav, Hero, cards, showcases, sections, Footer
+  components/             # BootScreen, navigation, catalog cards, sections, footer
   pages/index.astro       # portfolio and catalog landing page
   pages/mods/[slug].astro # crawlable details and compatibility page per mod
   pages/catalog.json.ts   # machine-readable release and discovery catalog
   pages/404.astro         # branded GitHub Pages fallback
-  scripts/                # reveal.ts (scroll reveal)
+  scripts/                # scroll reveal + validated browser-time Modrinth hydration
   styles/                 # tokens.css, global.css
 public/
   CNAME                   # modrinth.bearaujus.com
-  mods/<slug>/icon.png    # mod icons (used everywhere; no external images)
+  mods/<slug>/icon.png    # first-render and API-failure mod icons
 scripts/
   check-runtime.mjs       # fail-fast Node support check
   verify-built-site.mjs   # generated catalog, metadata, link, and asset checks
@@ -71,6 +72,9 @@ references, social-image dimensions, JSON-LD, manifest files, canonical
 metadata, safe external-link attributes, the custom 404 page, and the
 no-render-blocking-CSS/boot-screen first-paint contract.
 
+The same workflow tests Modrinth response normalization and stable-release
+selection with Node's built-in test runner.
+
 The deploy workflow runs on pull requests as a build-only check. Pushes to
 `main` and manual dispatches run the same checks before the GitHub Pages deploy.
 Dependabot keeps npm packages and GitHub Actions visible through grouped weekly
@@ -85,6 +89,10 @@ Minecraft compatibility line, runtime dependency minimums, user-facing summary,
 categories, discovery queries, and offline fallback metrics. Keep the four icons
 aligned with each addon's `release/icon.png`, update `public/og.png` only when
 its visible catalog message changes, then run `npm run verify` before deployment.
+
+Those fallback metrics power initial HTML, metadata, no-JS clients, and API
+failure states. Browser hydration updates the four known projects between
+deployments; adding a new project or static route still requires a catalog refresh.
 
 The catalog intentionally links each mod's exact current release as well as its
 stable Modrinth project page. This keeps user-facing pages useful immediately

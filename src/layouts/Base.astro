@@ -39,8 +39,18 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <script is:inline>
-      // Opt into the boot UI only when JavaScript can also dismiss it.
-      document.documentElement.dataset.boot = 'pending';
+      // The inline root color prevents a default-canvas flash on every page.
+      // Opt into the branded transition only for the first visit in this tab.
+      (() => {
+        try {
+          if (sessionStorage.getItem('bearaujus:boot-seen:v1') !== '1') {
+            document.documentElement.dataset.boot = 'pending';
+          }
+        } catch {
+          // Hardened storage modes retain the safe current every-page behavior.
+          document.documentElement.dataset.boot = 'pending';
+        }
+      })();
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -89,7 +99,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <slot name="head" />
 
   </head>
-  <body>
+  <body style="background-color: #0b0d10;">
     <BootScreen />
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />

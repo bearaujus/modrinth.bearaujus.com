@@ -1,8 +1,8 @@
 /* ============================================================
    Source of truth for the four published Fabric mods.
    Copy is distilled from each mod's Modrinth README. Fallback
-   download/follower counts are used when the live Modrinth API
-   is unreachable at build time.
+   download/follower counts are used for the first render and
+   whenever browser-time Modrinth hydration is unavailable.
    ============================================================ */
 
 export type Accent = 'ovr' | 'net' | 'end' | 'dawn';
@@ -42,7 +42,7 @@ export const MC_RANGE = '>=26.2 <26.3.0';
 export const LOADER = 'Fabric';
 export const LOADER_MIN_VERSION = '0.19.0';
 export const FABRIC_API_MIN_VERSION = '0.147.1+26.2';
-export const CATALOG_REVIEWED_AT = '2026-08-01';
+export const CATALOG_REVIEWED_AT = '2026-08-27';
 export const SITE_URL = 'https://modrinth.bearaujus.com';
 export const MODRINTH_USER = 'https://modrinth.com/user/bearaujus';
 export const SUPPORT_URL =
@@ -81,7 +81,7 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['dimension change notifier', 'dimension coordinates'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 135, followers: 3 },
+    fallback: { downloads: 198, followers: 3 },
   },
   {
     id: 'death-respawn-notifier',
@@ -103,7 +103,7 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['death coordinates', 'respawn notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 149, followers: 3 },
+    fallback: { downloads: 233, followers: 3 },
   },
   {
     id: 'improved-sleep',
@@ -125,7 +125,7 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep threshold', 'sleep percentage'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 87, followers: 0 },
+    fallback: { downloads: 201, followers: 0 },
   },
   {
     id: 'sleep-wake-up-notifier',
@@ -147,6 +147,6 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep progress', 'wake up notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 176, followers: 0 },
+    fallback: { downloads: 304, followers: 3 },
   },
 ] satisfies readonly Mod[];
