@@ -87,7 +87,7 @@ repository and drives every HTML page plus `/catalog.json`. For every mod
 release, update the exact Modrinth project and version IDs, release number,
 Minecraft compatibility line, runtime dependency minimums, user-facing summary,
 categories, discovery queries, and offline fallback metrics. Keep the four icons
-aligned with each addon's `release/icon.png`, update `public/og.png` only when
+aligned with each addon's `release/icon.png`, update the current social image (`public/og-26.3.png`) only when
 its visible catalog message changes, then run `npm run verify` before deployment.
 
 Those fallback metrics power initial HTML, metadata, no-JS clients, and API

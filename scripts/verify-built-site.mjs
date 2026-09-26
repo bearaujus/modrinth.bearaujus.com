@@ -44,7 +44,7 @@ function escapeRegExp(value) {
 
 function pngDimensions(bytes) {
   const signature = '89504e470d0a1a0a';
-  check(bytes.length >= 24 && bytes.subarray(0, 8).toString('hex') === signature, 'og.png is not a valid PNG');
+  check(bytes.length >= 24 && bytes.subarray(0, 8).toString('hex') === signature, 'og-26.3.png is not a valid PNG');
   return bytes.length >= 24
     ? { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
     : { width: 0, height: 0 };
@@ -87,9 +87,9 @@ check(
   catalog?.support === 'https://github.com/bearaujus-dungeon/minecraft-addons/issues',
   'catalog.json support URL is missing or stale',
 );
-check(catalog?.compatibility?.minecraft === '26.2', 'catalog.json Minecraft version is stale');
-check(catalog?.compatibility?.series === '26.2.x', 'catalog.json Minecraft series is stale');
-check(catalog?.compatibility?.range === '>=26.2 <26.3.0', 'catalog.json Minecraft range is stale');
+check(catalog?.compatibility?.minecraft === '26.3', 'catalog.json Minecraft version is stale');
+check(catalog?.compatibility?.series === '26.3.x', 'catalog.json Minecraft series is stale');
+check(catalog?.compatibility?.range === '>=26.3 <26.4.0', 'catalog.json Minecraft range is stale');
 check(catalog?.compatibility?.loader === 'Fabric', 'catalog.json loader is stale');
 check(catalogMods.length === publicModSlugs.length, 'catalog mod count does not match public icon folders');
 
@@ -105,7 +105,7 @@ for (const mod of catalogMods) {
   const label = typeof mod?.slug === 'string' ? mod.slug : '<invalid mod>';
   check(typeof mod?.name === 'string' && mod.name.length >= 3, `${label}: catalog name is invalid`);
   check(typeof mod?.summary === 'string' && mod.summary.length >= 40, `${label}: catalog summary is too short`);
-  check(/^\d+\.\d+\.\d+\+26\.2$/.test(mod?.version ?? ''), `${label}: catalog version is invalid`);
+  check(/^\d+\.\d+\.\d+\+26\.3$/.test(mod?.version ?? ''), `${label}: catalog version is invalid`);
   check(/^[A-Za-z0-9]{8}$/.test(mod?.projectId ?? ''), `${label}: project id is invalid`);
   check(/^[A-Za-z0-9]{8}$/.test(mod?.versionId ?? ''), `${label}: version id is invalid`);
   check(!projectIds.has(mod?.projectId), `${label}: duplicate project id`);
@@ -242,7 +242,7 @@ for (const required of [
   'icon-512.png',
   'apple-touch-icon.png',
   'catalog.json',
-  'og.png',
+  'og-26.3.png',
   'robots.txt',
   'site.webmanifest',
   'sitemap-index.xml',
@@ -289,10 +289,10 @@ check(
   'generated client JavaScript is missing the bounded session cache',
 );
 
-const ogBytes = await readFile(path.join(DIST, 'og.png'));
+const ogBytes = await readFile(path.join(DIST, 'og-26.3.png'));
 const og = pngDimensions(ogBytes);
-check(metaContent(indexHtml, 'property', 'og:image:width') === String(og.width), 'og:image:width does not match og.png');
-check(metaContent(indexHtml, 'property', 'og:image:height') === String(og.height), 'og:image:height does not match og.png');
+check(metaContent(indexHtml, 'property', 'og:image:width') === String(og.width), 'og:image:width does not match og-26.3.png');
+check(metaContent(indexHtml, 'property', 'og:image:height') === String(og.height), 'og:image:height does not match og-26.3.png');
 check(Boolean(metaContent(indexHtml, 'name', 'twitter:image:alt')), 'twitter:image:alt is missing');
 
 const cname = (await readFile(path.join(DIST, 'CNAME'), 'utf8')).trim();

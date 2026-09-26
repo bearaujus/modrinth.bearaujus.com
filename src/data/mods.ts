@@ -35,13 +35,13 @@ export type Mod = Readonly<{
 }>;
 
 /** Exact release used for build and runtime validation. */
-export const MC_VERSION = '26.2';
+export const MC_VERSION = '26.3';
 /** Patch-tolerant public compatibility line declared by every listed mod. */
-export const MC_SERIES = '26.2.x';
-export const MC_RANGE = '>=26.2 <26.3.0';
+export const MC_SERIES = '26.3.x';
+export const MC_RANGE = '>=26.3 <26.4.0';
 export const LOADER = 'Fabric';
-export const LOADER_MIN_VERSION = '0.19.0';
-export const FABRIC_API_MIN_VERSION = '0.147.1+26.2';
+export const LOADER_MIN_VERSION = '0.19.5';
+export const FABRIC_API_MIN_VERSION = '0.161.0+26.3';
 export const CATALOG_REVIEWED_AT = '2026-09-27';
 export const SITE_URL = 'https://modrinth.bearaujus.com';
 export const MODRINTH_USER = 'https://modrinth.com/user/bearaujus';
@@ -65,8 +65,8 @@ export const MODS = [
     id: 'dimension-notifier',
     name: 'Dimension Notifier',
     slug: 'dimension-notifier',
-    releaseVersion: '0.2.6+26.2',
-    modrinthVersionId: '7AivJv03',
+    releaseVersion: '0.2.7+26.3',
+    modrinthVersionId: '5ib9Udpn',
     modrinthId: 'kpwhwrp4',
     accent: 'end',
     summary:
@@ -81,14 +81,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['dimension change notifier', 'dimension coordinates'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 234, followers: 3 },
+    fallback: { downloads: 239, followers: 3 },
   },
   {
     id: 'death-respawn-notifier',
     name: 'Death Respawn Notifier',
     slug: 'death-respawn-notifier',
-    releaseVersion: '0.2.6+26.2',
-    modrinthVersionId: 'tYrkzBGo',
+    releaseVersion: '0.2.7+26.3',
+    modrinthVersionId: 'qQFi40PZ',
     modrinthId: 'WmLlAWdJ',
     accent: 'net',
     summary:
@@ -103,14 +103,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['death coordinates', 'respawn notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 281, followers: 3 },
+    fallback: { downloads: 286, followers: 3 },
   },
   {
     id: 'improved-sleep',
     name: 'Improved Sleep',
     slug: 'improved-sleep',
-    releaseVersion: '0.1.5+26.2',
-    modrinthVersionId: 'wR3Taiw9',
+    releaseVersion: '0.1.6+26.3',
+    modrinthVersionId: 'fsZI5vyx',
     modrinthId: 'q7ix822L',
     accent: 'end',
     summary:
@@ -125,14 +125,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep threshold', 'sleep percentage'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 310, followers: 0 },
+    fallback: { downloads: 315, followers: 0 },
   },
   {
     id: 'sleep-wake-up-notifier',
     name: 'Sleep Wake-Up Notifier',
     slug: 'sleep-wake-up-notifier',
-    releaseVersion: '0.1.5+26.2',
-    modrinthVersionId: 'jkyoOayI',
+    releaseVersion: '0.1.6+26.3',
+    modrinthVersionId: 'd1m04h8n',
     modrinthId: 'DBW4p9Pt',
     accent: 'dawn',
     summary:
@@ -147,6 +147,6 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep progress', 'wake up notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 408, followers: 3 },
+    fallback: { downloads: 413, followers: 3 },
   },
 ] satisfies readonly Mod[];

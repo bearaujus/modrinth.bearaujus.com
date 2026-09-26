@@ -20,13 +20,13 @@ export interface Props {
 
 const {
   title = 'Server-First Minecraft Fabric Mods | bearaujus',
-  description = 'Four server-first Minecraft 26.2.x Fabric mods by bearaujus: dimension change notifications, death coordinates, multiplayer sleep thresholds, and live sleep progress.',
+  description = 'Four server-first Minecraft 26.3.x Fabric mods by bearaujus: dimension change notifications, death coordinates, multiplayer sleep thresholds, and live sleep progress.',
   robots = 'index, follow, max-image-preview:large',
   imageAlt = 'bearaujus — server-first Minecraft Fabric mods, live on Modrinth',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL('/og.png', Astro.site).href;
+const ogImage = new URL('/og-26.3.png', Astro.site).href;
 
 // This root-level color paints before the render-blocking stylesheet arrives.
 // Keep it in sync with --void in styles/tokens.css.
@@ -86,8 +86,8 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="2400" />
-    <meta property="og:image:height" content="1260" />
+    <meta property="og:image:width" content="1731" />
+    <meta property="og:image:height" content="909" />
     <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
