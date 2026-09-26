@@ -42,7 +42,7 @@ export const MC_RANGE = '>=26.2 <26.3.0';
 export const LOADER = 'Fabric';
 export const LOADER_MIN_VERSION = '0.19.0';
 export const FABRIC_API_MIN_VERSION = '0.147.1+26.2';
-export const CATALOG_REVIEWED_AT = '2026-08-27';
+export const CATALOG_REVIEWED_AT = '2026-09-27';
 export const SITE_URL = 'https://modrinth.bearaujus.com';
 export const MODRINTH_USER = 'https://modrinth.com/user/bearaujus';
 export const SUPPORT_URL =
@@ -65,8 +65,8 @@ export const MODS = [
     id: 'dimension-notifier',
     name: 'Dimension Notifier',
     slug: 'dimension-notifier',
-    releaseVersion: '0.2.5+26.2',
-    modrinthVersionId: 'NgieY3xU',
+    releaseVersion: '0.2.6+26.2',
+    modrinthVersionId: '7AivJv03',
     modrinthId: 'kpwhwrp4',
     accent: 'end',
     summary:
@@ -81,14 +81,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['dimension change notifier', 'dimension coordinates'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 198, followers: 3 },
+    fallback: { downloads: 234, followers: 3 },
   },
   {
     id: 'death-respawn-notifier',
     name: 'Death Respawn Notifier',
     slug: 'death-respawn-notifier',
-    releaseVersion: '0.2.5+26.2',
-    modrinthVersionId: 'bDagsVnx',
+    releaseVersion: '0.2.6+26.2',
+    modrinthVersionId: 'tYrkzBGo',
     modrinthId: 'WmLlAWdJ',
     accent: 'net',
     summary:
@@ -103,14 +103,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['death coordinates', 'respawn notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 233, followers: 3 },
+    fallback: { downloads: 281, followers: 3 },
   },
   {
     id: 'improved-sleep',
     name: 'Improved Sleep',
     slug: 'improved-sleep',
-    releaseVersion: '0.1.4+26.2',
-    modrinthVersionId: '2eNsfgd0',
+    releaseVersion: '0.1.5+26.2',
+    modrinthVersionId: 'wR3Taiw9',
     modrinthId: 'q7ix822L',
     accent: 'end',
     summary:
@@ -125,14 +125,14 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep threshold', 'sleep percentage'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 201, followers: 0 },
+    fallback: { downloads: 310, followers: 0 },
   },
   {
     id: 'sleep-wake-up-notifier',
     name: 'Sleep Wake-Up Notifier',
     slug: 'sleep-wake-up-notifier',
-    releaseVersion: '0.1.4+26.2',
-    modrinthVersionId: 'TX21fbWC',
+    releaseVersion: '0.1.5+26.2',
+    modrinthVersionId: 'jkyoOayI',
     modrinthId: 'DBW4p9Pt',
     accent: 'dawn',
     summary:
@@ -147,6 +147,6 @@ export const MODS = [
     additionalCategories: ['management'],
     discoveryQueries: ['sleep progress', 'wake up notifier'],
     env: { client: 'optional', server: 'required' },
-    fallback: { downloads: 304, followers: 3 },
+    fallback: { downloads: 408, followers: 3 },
   },
 ] satisfies readonly Mod[];
